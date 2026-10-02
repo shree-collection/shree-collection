@@ -13,10 +13,14 @@
   --brand-navy: #172554;
   --brand-navy-dark: #0f172a;
 
-  --brand-gold: #ffc928;
-  --brand-gold-soft: #fff4c7;
+  /* Legacy gold tokens kept as coral aliases so older
+     components continue working without reintroducing yellow. */
+  --brand-gold: #f43f5e;
+  --brand-gold-soft: #fff1f3;
 
   --brand-coral: #f43f5e;
+  --brand-coral-dark: #e11d48;
+  --brand-coral-soft: #fff1f3;
 
   /* -------------------------------------------------------
      BACKGROUNDS
@@ -24,7 +28,7 @@
 
   --background: #fffdf7;
   --surface: #ffffff;
-  --surface-soft: #fff9e8;
+  --surface-soft: #fff7f8;
   --surface-muted: #f8fafc;
   --surface-dark: #0f172a;
 
@@ -45,7 +49,9 @@
 
   --border: #e2e8f0;
   --border-soft: #f1f5f9;
-  --border-brand: rgba(255, 201, 40, 0.35);
+
+  /* Legacy token retained for compatibility */
+  --border-brand: rgba(244, 63, 94, 0.25);
 
   /* -------------------------------------------------------
      STATUS COLORS
@@ -92,13 +98,16 @@
     0 4px 12px rgba(15, 23, 42, 0.07);
 
   --shadow-lg:
-    0 10px 30px rgba(15, 23, 42, 0.10);
+    0 10px 30px rgba(15, 23, 42, 0.1);
 
   --shadow-xl:
     0 20px 45px rgba(15, 23, 42, 0.12);
 
   --shadow-brand:
-    0 8px 24px rgba(255, 201, 40, 0.20);
+    0 8px 24px rgba(244, 63, 94, 0.18);
+
+  --shadow-coral:
+    0 8px 24px rgba(244, 63, 94, 0.18);
 
   /* -------------------------------------------------------
      TRANSITIONS
@@ -122,10 +131,13 @@
   --color-brand-navy: var(--brand-navy);
   --color-brand-navy-dark: var(--brand-navy-dark);
 
+  /* Legacy compatibility */
   --color-brand-gold: var(--brand-gold);
   --color-brand-gold-soft: var(--brand-gold-soft);
 
   --color-brand-coral: var(--brand-coral);
+  --color-brand-coral-dark: var(--brand-coral-dark);
+  --color-brand-coral-soft: var(--brand-coral-soft);
 
   --color-surface: var(--surface);
   --color-surface-soft: var(--surface-soft);
@@ -173,7 +185,6 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
     background: var(--background);
   }
 
@@ -269,7 +280,7 @@
      ------------------------------------------------------- */
 
   :focus-visible {
-    outline: 2px solid var(--brand-gold);
+    outline: 2px solid var(--brand-coral);
     outline-offset: 2px;
   }
 
@@ -278,8 +289,8 @@
      ------------------------------------------------------- */
 
   ::selection {
-    background: var(--brand-gold);
-    color: var(--brand-navy);
+    background: var(--brand-coral);
+    color: #ffffff;
   }
 }
 
@@ -312,9 +323,7 @@
 .container-shop {
   width: 100%;
   max-width: var(--container-width);
-
   margin-inline: auto;
-
   padding-inline: 1rem;
 }
 
@@ -476,6 +485,12 @@
   box-shadow: var(--shadow-sm);
 }
 
+/*
+ * Legacy .btn-gold class.
+ * Kept so older components do not break, but now uses
+ * the Shree Collection coral brand instead of yellow.
+ */
+
 .btn-gold {
   display: inline-flex;
   align-items: center;
@@ -485,26 +500,66 @@
   min-height: 44px;
   padding: 0.7rem 1.2rem;
 
-  border: 1px solid var(--brand-gold);
+  border: 1px solid var(--brand-coral);
   border-radius: var(--radius-md);
 
-  background: var(--brand-gold);
-  color: var(--brand-navy);
+  background: var(--brand-coral);
+  color: #ffffff;
 
   font-size: 0.9rem;
   font-weight: 700;
 
   transition:
     background var(--transition-fast),
+    border-color var(--transition-fast),
     box-shadow var(--transition-fast),
     transform var(--transition-fast);
 }
 
 .btn-gold:hover {
-  box-shadow: var(--shadow-brand);
+  background: var(--brand-coral-dark);
+  border-color: var(--brand-coral-dark);
+  box-shadow: var(--shadow-coral);
 }
 
 .btn-gold:active {
+  transform: translateY(1px);
+}
+
+/* New coral button utility */
+
+.btn-coral {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  min-height: 44px;
+  padding: 0.7rem 1.2rem;
+
+  border: 1px solid var(--brand-coral);
+  border-radius: var(--radius-md);
+
+  background: var(--brand-coral);
+  color: #ffffff;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.btn-coral:hover {
+  background: var(--brand-coral-dark);
+  border-color: var(--brand-coral-dark);
+  box-shadow: var(--shadow-coral);
+}
+
+.btn-coral:active {
   transform: translateY(1px);
 }
 
@@ -539,10 +594,6 @@ video {
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {

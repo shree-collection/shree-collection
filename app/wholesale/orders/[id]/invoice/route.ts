@@ -18,7 +18,7 @@ type RouteContext = {
 
 function formatStatus(status: string) {
   return String(status || "")
-    .replace(/_/g, " ")
+    .replace(/\_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
@@ -104,10 +104,6 @@ export async function GET(
       );
     }
 
-    /*
-     * The check above guarantees that the order exists.
-     * Keep a non-null reference for TypeScript.
-     */
     const invoiceOrder = order;
 
     /* =========================================================
@@ -174,15 +170,13 @@ export async function GET(
 
     const pdfDoc = await PDFDocument.create();
 
-    const regularFont =
-      await pdfDoc.embedFont(
-        StandardFonts.Helvetica
-      );
+    const regularFont = await pdfDoc.embedFont(
+      StandardFonts.Helvetica
+    );
 
-    const boldFont =
-      await pdfDoc.embedFont(
-        StandardFonts.HelveticaBold
-      );
+    const boldFont = await pdfDoc.embedFont(
+      StandardFonts.HelveticaBold
+    );
 
     const pageWidth = 595.28;
     const pageHeight = 841.89;
@@ -204,12 +198,6 @@ export async function GET(
     const darkNavy = rgb(
       0.06,
       0.09,
-      0.16
-    );
-
-    const gold = rgb(
-      1,
-      0.79,
       0.16
     );
 
@@ -249,10 +237,10 @@ export async function GET(
       0.91
     );
 
-    const softGold = rgb(
+    const softCoral = rgb(
       1,
-      0.97,
-      0.82
+      0.95,
+      0.96
     );
 
     const softGreen = rgb(
@@ -488,7 +476,7 @@ export async function GET(
       y: pageHeight - 112,
       width: 7,
       height: 112,
-      color: gold,
+      color: coral,
     });
 
     drawText(
@@ -501,25 +489,12 @@ export async function GET(
     );
 
     drawText(
-      "श्री कलेक्शन",
+      "Wholesale Invoice",
       margin,
-      pageHeight - 70,
-      8,
-      false,
-      rgb(
-        0.85,
-        0.88,
-        0.94
-      )
-    );
-
-    drawText(
-      "WHOLESALE INVOICE",
-      margin,
-      pageHeight - 92,
+      pageHeight - 72,
       9,
       true,
-      gold
+      coral
     );
 
     drawRightText(
@@ -713,7 +688,7 @@ export async function GET(
       gray
     );
 
-    /* Right side order/customer panel */
+    /* Right customer panel */
 
     const infoX = 350;
 
@@ -721,9 +696,11 @@ export async function GET(
       x: infoX,
       y: billStartY - 70,
       width:
-        pageWidth - margin - infoX,
+        pageWidth -
+        margin -
+        infoX,
       height: 80,
-      color: softGold,
+      color: softCoral,
     });
 
     drawText(
@@ -937,11 +914,15 @@ export async function GET(
     );
 
     drawRightText(
-      money(
-        Number(
-          invoiceOrder.shipping_amount
-        )
-      ),
+      Number(
+        invoiceOrder.shipping_amount
+      ) === 0
+        ? "FREE"
+        : money(
+            Number(
+              invoiceOrder.shipping_amount
+            )
+          ),
       summaryX +
         summaryWidth -
         12,
@@ -1012,7 +993,7 @@ export async function GET(
       y - 99,
       10,
       true,
-      green
+      coral
     );
 
     /* =========================================================
@@ -1075,15 +1056,8 @@ export async function GET(
        Generate PDF
     ========================================================= */
 
-    const pdfBytes =
-      await pdfDoc.save();
+    const pdfBytes = await pdfDoc.save();
 
-    /*
-     * pdf-lib returns Uint8Array<ArrayBufferLike>.
-     * NextResponse's BodyInit typing in the current
-     * Next.js/TypeScript setup does not accept it directly.
-     * Buffer is converted explicitly and cast to BodyInit.
-     */
     const pdfBody =
       Buffer.from(pdfBytes) as unknown as BodyInit;
 
@@ -1095,7 +1069,8 @@ export async function GET(
           "Content-Type":
             "application/pdf",
 
-          "Content-Disposition": `attachment; filename="Invoice-${invoiceOrder.order_number}.pdf"`,
+          "Content-Disposition":
+            `attachment; filename="Invoice-${invoiceOrder.order_number}.pdf"`,
 
           "Cache-Control":
             "no-store",

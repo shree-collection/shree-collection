@@ -7,9 +7,11 @@ import Footer from "@/components/Footer";
 import { CartProvider } from "@/components/cart/CartContext";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "http://localhost:3000";
 
-const siteTitle = "Shree Collection | Gifts, Toys & Party Items";
+const siteTitle =
+  "Shree Collection | Gifts, Toys & Party Items";
 
 const siteDescription =
   "Discover trending gifts, toys, party essentials, stationery, ladies bags, gift hampers, key chains and divine decor at Shree Collection.";
@@ -69,7 +71,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <body className="min-h-screen bg-background text-foreground antialiased">
         <CartProvider>
           <Header />

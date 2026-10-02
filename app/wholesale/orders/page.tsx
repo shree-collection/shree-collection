@@ -45,7 +45,7 @@ function getStatusClass(status: string) {
       return "border-red-100 bg-red-50 text-red-700";
 
     default:
-      return "border-amber-100 bg-amber-50 text-amber-700";
+      return "border-slate-200 bg-slate-50 text-slate-600";
   }
 }
 
@@ -61,7 +61,7 @@ function getPaymentStatusClass(status: string) {
       return "border-purple-100 bg-purple-50 text-purple-700";
 
     default:
-      return "border-amber-100 bg-amber-50 text-amber-700";
+      return "border-slate-200 bg-slate-50 text-slate-600";
   }
 }
 
@@ -71,7 +71,7 @@ function getStatusStep(status: string) {
 
 function formatStatus(status: string) {
   return status
-    .replace(/_/g, " ")
+    .replace(/\_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
@@ -82,6 +82,13 @@ function formatDate(date: string) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+}
+
+function formatAmount(amount: number) {
+  return Number(amount || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 }
 
@@ -138,7 +145,8 @@ export default function WholesaleOrdersPage() {
   }, []);
 
   const deliveredCount = orders.filter(
-    (order) => order.status.toLowerCase() === "delivered"
+    (order) =>
+      order.status.toLowerCase() === "delivered"
   ).length;
 
   const pendingCount = orders.filter(
@@ -146,104 +154,126 @@ export default function WholesaleOrdersPage() {
       order.status.toLowerCase() === "pending"
   ).length;
 
+  const activeCount = orders.filter(
+    (order) => {
+      const status = order.status.toLowerCase();
+
+      return (
+        status !== "delivered" &&
+        status !== "cancelled"
+      );
+    }
+  ).length;
+
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container-shop px-4 py-6 sm:px-6 sm:py-8">
+    <main className="min-h-screen bg-[#fffdf7]">
+      <div className="container-shop px-4 py-5 sm:px-6 sm:py-7">
         {/* Header */}
-        <section className="overflow-hidden rounded-3xl bg-brand-navy shadow-soft">
+        <section className="overflow-hidden rounded-3xl bg-[#172554] shadow-sm">
           <div className="relative p-5 text-white sm:p-7">
-            {/* Decorative elements */}
-            <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-brand-gold/10" />
-            <div className="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-brand-coral/10" />
+            <div
+              className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/5"
+              aria-hidden="true"
+            />
 
-            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-gold" />
+            <div
+              className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-[#f43f5e]/10"
+              aria-hidden="true"
+            />
 
-                  <span className="text-[10px] font-black uppercase tracking-[0.16em] text-white/80">
-                    Wholesale Portal
-                  </span>
+            <div className="relative z-10">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-[#f43f5e]"
+                      aria-hidden="true"
+                    />
+
+                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-white/75">
+                      Wholesale Portal
+                    </span>
+                  </div>
+
+                  <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">
+                    My Orders
+                  </h1>
+
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-white/65">
+                    View your wholesale orders, check payment
+                    status and track order progress.
+                  </p>
                 </div>
 
-                <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">
-                  My Orders
-                </h1>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href="/wholesale"
+                    className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-[#172554] transition hover:bg-slate-100"
+                  >
+                    Continue Shopping
+                  </Link>
 
-                <p className="mt-2 max-w-xl text-sm leading-6 text-white/65">
-                  View your wholesale orders, check payment
-                  status and track order progress.
-                </p>
+                  <Link
+                    href="/wholesale/cart"
+                    className="inline-flex items-center justify-center rounded-xl bg-[#f43f5e] px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-[#e11d48]"
+                  >
+                    🛒 Cart
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => loadOrders(true)}
+                    disabled={refreshing}
+                    className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {refreshing
+                      ? "↻ Refreshing..."
+                      : "↻ Refresh"}
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href="/wholesale"
-                  className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-brand-navy transition hover:bg-slate-100"
-                >
-                  Continue Shopping
-                </Link>
+              {/* Stats */}
+              {!loading && !error && (
+                <div className="relative mt-6 grid grid-cols-3 gap-2 border-t border-white/10 pt-5 sm:max-w-2xl sm:gap-3">
+                  <div className="rounded-2xl bg-white/5 p-3 sm:p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-white/45">
+                      Total Orders
+                    </p>
 
-                <Link
-                  href="/wholesale/cart"
-                  className="inline-flex items-center justify-center rounded-xl bg-brand-gold px-4 py-3 text-sm font-black text-brand-navy transition hover:bg-brand-gold-dark"
-                >
-                  🛒 Cart
-                </Link>
+                    <p className="mt-1 text-xl font-black sm:text-2xl">
+                      {orders.length}
+                    </p>
+                  </div>
 
-                <button
-                  type="button"
-                  onClick={() => loadOrders(true)}
-                  disabled={refreshing}
-                  className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {refreshing
-                    ? "↻ Refreshing..."
-                    : "↻ Refresh"}
-                </button>
-              </div>
+                  <div className="rounded-2xl bg-white/5 p-3 sm:p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-white/45">
+                      In Progress
+                    </p>
+
+                    <p className="mt-1 text-xl font-black text-[#fda4af] sm:text-2xl">
+                      {activeCount}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/5 p-3 sm:p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-white/45">
+                      Delivered
+                    </p>
+
+                    <p className="mt-1 text-xl font-black text-emerald-300 sm:text-2xl">
+                      {deliveredCount}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-
-            {/* Stats */}
-            {!loading && !error && (
-              <div className="relative mt-6 grid grid-cols-3 gap-2 border-t border-white/10 pt-5 sm:max-w-xl sm:grid-cols-3 sm:gap-3">
-                <div className="rounded-2xl bg-white/5 p-3 sm:p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-white/45">
-                    Total Orders
-                  </p>
-
-                  <p className="mt-1 text-xl font-black sm:text-2xl">
-                    {orders.length}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/5 p-3 sm:p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-white/45">
-                    Pending
-                  </p>
-
-                  <p className="mt-1 text-xl font-black text-brand-gold sm:text-2xl">
-                    {pendingCount}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/5 p-3 sm:p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-white/45">
-                    Delivered
-                  </p>
-
-                  <p className="mt-1 text-xl font-black text-emerald-300 sm:text-2xl">
-                    {deliveredCount}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </section>
 
         {/* Error */}
         {error && (
-          <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 sm:p-5">
+          <div className="mt-5 rounded-2xl border border-red-100 bg-red-50 p-4 sm:p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-sm">
@@ -274,17 +304,17 @@ export default function WholesaleOrdersPage() {
 
         {/* Loading */}
         {loading && (
-          <div className="mt-6 rounded-3xl border border-border bg-white p-10 text-center shadow-soft sm:p-14">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-soft-gold text-3xl">
+          <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm sm:p-14">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#fff1f3] text-3xl">
               📦
             </div>
 
-            <p className="mt-4 text-sm font-bold text-text-muted">
+            <p className="mt-4 text-sm font-bold text-slate-500">
               Loading your orders...
             </p>
 
-            <div className="mx-auto mt-4 h-1.5 w-32 overflow-hidden rounded-full bg-surface-muted">
-              <div className="h-full w-1/2 animate-pulse rounded-full bg-brand-gold" />
+            <div className="mx-auto mt-4 h-1.5 w-32 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-full w-1/2 animate-pulse rounded-full bg-[#f43f5e]" />
             </div>
           </div>
         )}
@@ -293,23 +323,23 @@ export default function WholesaleOrdersPage() {
         {!loading &&
           !error &&
           orders.length === 0 && (
-            <div className="mt-6 rounded-3xl border border-border bg-white p-8 text-center shadow-soft sm:p-12">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-brand-soft-gold text-4xl">
+            <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-12">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[#fff1f3] text-4xl">
                 📦
               </div>
 
-              <h2 className="mt-5 text-xl font-black text-brand-navy sm:text-2xl">
+              <h2 className="mt-5 text-xl font-black text-[#172554] sm:text-2xl">
                 No orders yet
               </h2>
 
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-text-muted">
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
                 Your wholesale orders will appear here
                 after you place your first order.
               </p>
 
               <Link
                 href="/wholesale"
-                className="mt-6 inline-flex items-center rounded-xl bg-brand-navy px-6 py-3.5 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
+                className="mt-6 inline-flex items-center rounded-xl bg-[#f43f5e] px-6 py-3.5 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e11d48]"
               >
                 Start Shopping
                 <span className="ml-2">→</span>
@@ -321,7 +351,7 @@ export default function WholesaleOrdersPage() {
         {!loading &&
           !error &&
           orders.length > 0 && (
-            <div className="mt-6 space-y-5">
+            <div className="mt-5 space-y-5">
               {orders.map((order) => {
                 const currentStep = getStatusStep(
                   order.status
@@ -334,18 +364,18 @@ export default function WholesaleOrdersPage() {
                 return (
                   <article
                     key={order.id}
-                    className="overflow-hidden rounded-3xl border border-border bg-white shadow-soft"
+                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
                   >
                     {/* Order Header */}
-                    <div className="border-b border-border p-5 sm:p-6">
+                    <div className="border-b border-slate-200 p-5 sm:p-6">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-surface-muted px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-text-muted">
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-slate-500">
                               Order
                             </span>
 
-                            <span className="text-[11px] text-text-light">
+                            <span className="text-[11px] text-slate-400">
                               {formatDate(
                                 order.created_at
                               )}
@@ -354,10 +384,19 @@ export default function WholesaleOrdersPage() {
 
                           <Link
                             href={`/wholesale/orders/${order.id}`}
-                            className="mt-2 inline-block text-lg font-black text-brand-navy transition hover:text-brand-coral hover:underline sm:text-xl"
+                            className="mt-2 inline-block text-lg font-black text-[#172554] transition hover:text-[#f43f5e] sm:text-xl"
                           >
                             {order.order_number}
                           </Link>
+
+                          {order.shipping_name && (
+                            <p className="mt-1 text-xs text-slate-500">
+                              {order.shipping_name}
+                              {order.shipping_phone
+                                ? ` • ${order.shipping_phone}`
+                                : ""}
+                            </p>
+                          )}
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2.5">
@@ -371,11 +410,11 @@ export default function WholesaleOrdersPage() {
                             )}
                           </span>
 
-                          <span className="text-lg font-black text-brand-navy sm:text-xl">
+                          <span className="text-lg font-black text-[#172554] sm:text-xl">
                             ₹
-                            {Number(
+                            {formatAmount(
                               order.total_amount
-                            ).toFixed(2)}
+                            )}
                           </span>
                         </div>
                       </div>
@@ -383,14 +422,14 @@ export default function WholesaleOrdersPage() {
 
                     {/* Progress */}
                     {!isCancelled && (
-                      <div className="border-b border-border px-5 py-5 sm:px-6">
+                      <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-text-light">
+                          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
                             Order Progress
                           </p>
 
                           {currentStep >= 0 && (
-                            <span className="text-[10px] font-bold text-text-muted">
+                            <span className="text-[10px] font-bold text-slate-500">
                               {Math.min(
                                 currentStep + 1,
                                 orderStatuses.length
@@ -420,10 +459,9 @@ export default function WholesaleOrdersPage() {
                                   {index > 0 && (
                                     <div
                                       className={`absolute right-1/2 top-3 h-0.5 w-full ${
-                                        index <=
-                                        currentStep
-                                          ? "bg-brand-navy"
-                                          : "bg-border"
+                                        index <= currentStep
+                                          ? "bg-[#172554]"
+                                          : "bg-slate-200"
                                       }`}
                                     />
                                   )}
@@ -431,8 +469,8 @@ export default function WholesaleOrdersPage() {
                                   <div
                                     className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-black ${
                                       active
-                                        ? "bg-brand-navy text-white shadow-sm"
-                                        : "border border-border bg-white text-text-light"
+                                        ? "bg-[#172554] text-white shadow-sm"
+                                        : "border border-slate-200 bg-white text-slate-400"
                                     }`}
                                   >
                                     {active
@@ -443,8 +481,8 @@ export default function WholesaleOrdersPage() {
                                   <p
                                     className={`mt-2 text-center text-[10px] font-bold sm:text-xs ${
                                       active
-                                        ? "text-brand-navy"
-                                        : "text-text-light"
+                                        ? "text-[#172554]"
+                                        : "text-slate-400"
                                     }`}
                                   >
                                     {step}
@@ -459,7 +497,7 @@ export default function WholesaleOrdersPage() {
 
                     {/* Cancelled */}
                     {isCancelled && (
-                      <div className="border-b border-border px-5 py-5 sm:px-6">
+                      <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
                         <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100">
                             ❌
@@ -482,21 +520,21 @@ export default function WholesaleOrdersPage() {
 
                     {/* Summary */}
                     <div className="grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
-                      <div className="rounded-2xl border border-border bg-surface-muted p-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-text-light">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
                           Subtotal
                         </p>
 
-                        <p className="mt-1.5 text-lg font-black text-brand-navy">
+                        <p className="mt-1.5 text-lg font-black text-[#172554]">
                           ₹
-                          {Number(
+                          {formatAmount(
                             order.subtotal
-                          ).toFixed(2)}
+                          )}
                         </p>
                       </div>
 
-                      <div className="rounded-2xl border border-border bg-surface-muted p-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-text-light">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
                           Payment
                         </p>
 
@@ -509,27 +547,35 @@ export default function WholesaleOrdersPage() {
                             order.payment_status
                           )}
                         </span>
+
+                        {order.payment_method && (
+                          <p className="mt-2 text-[10px] font-semibold text-slate-400">
+                            {formatStatus(
+                              order.payment_method
+                            )}
+                          </p>
+                        )}
                       </div>
 
-                      <div className="rounded-2xl border border-brand-gold/20 bg-brand-soft-gold p-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-text-muted">
+                      <div className="rounded-2xl border border-[#f43f5e]/10 bg-[#fff1f3] p-4">
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
                           Total
                         </p>
 
-                        <p className="mt-1.5 text-lg font-black text-brand-navy">
+                        <p className="mt-1.5 text-lg font-black text-[#172554]">
                           ₹
-                          {Number(
+                          {formatAmount(
                             order.total_amount
-                          ).toFixed(2)}
+                          )}
                         </p>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="grid gap-2 border-t border-border p-5 sm:grid-cols-2 sm:p-6">
+                    <div className="grid gap-2 border-t border-slate-200 p-5 sm:grid-cols-2 sm:p-6">
                       <Link
                         href={`/wholesale/orders/${order.id}`}
-                        className="inline-flex items-center justify-center rounded-xl bg-brand-navy px-4 py-3.5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
+                        className="inline-flex items-center justify-center rounded-xl bg-[#172554] px-4 py-3.5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
                       >
                         View Order Details
                         <span className="ml-2">
@@ -539,7 +585,7 @@ export default function WholesaleOrdersPage() {
 
                       <Link
                         href={`/wholesale/orders/${order.id}`}
-                        className="inline-flex items-center justify-center rounded-xl border border-border bg-white px-4 py-3.5 text-sm font-bold text-brand-navy transition hover:border-brand-navy hover:bg-surface-muted"
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-[#172554] transition hover:border-[#172554] hover:bg-slate-50"
                       >
                         📄 View Invoice
                       </Link>

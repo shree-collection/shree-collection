@@ -14,6 +14,9 @@ type OrderResult = {
   total_amount: number;
 };
 
+const formatPrice = (value: number) =>
+  `₹${value.toLocaleString("en-IN")}`;
+
 export default function CheckoutPage() {
   const {
     cart,
@@ -56,9 +59,7 @@ export default function CheckoutPage() {
   ) => {
     event.preventDefault();
 
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     setErrorMessage("");
 
@@ -186,64 +187,66 @@ export default function CheckoutPage() {
     }
   };
 
-  /* =====================================================
+  /* =========================================================
      ORDER SUCCESS
-  ===================================================== */
+     ========================================================= */
 
   if (orderResult) {
     return (
-      <main className="min-h-screen bg-[#f8fafc] px-4 py-8 sm:py-12">
-        <div className="mx-auto max-w-xl">
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            <div className="h-1.5 bg-emerald-500" />
+      <main className="min-h-screen bg-[#f8fafc] px-4 py-8 sm:py-12 lg:py-16">
+        <div className="mx-auto max-w-2xl">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="h-1 bg-emerald-500" />
 
-            <div className="p-6 text-center sm:p-8">
-              {/* Success Icon */}
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-4xl text-emerald-600">
-                ✓
+            <div className="p-5 sm:p-8">
+              <div className="text-center">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-4xl font-black text-emerald-600">
+                  ✓
+                </div>
+
+                <p className="mt-5 text-[10px] font-black uppercase tracking-[0.18em] text-brand-coral">
+                  Shree Collection
+                </p>
+
+                <h1 className="mt-2 text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
+                  Order Placed Successfully!
+                </h1>
+
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+                  Thank you for shopping with Shree
+                  Collection. Your order has been received
+                  successfully.
+                </p>
               </div>
 
-              <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.16em] text-[#f43f5e]">
-                Shree Collection
-              </p>
+              {/* Order number */}
 
-              <h1 className="mt-2 text-2xl font-black tracking-tight text-[#172554] sm:text-3xl">
-                Order Placed Successfully!
-              </h1>
-
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Thank you for shopping with Shree
-                Collection. Your order has been received
-                successfully.
-              </p>
-
-              {/* Order Number */}
-              <div className="mt-6 rounded-2xl bg-[#172554] p-5 text-white">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-blue-200">
+              <div className="mt-6 rounded-xl bg-brand-navy p-4 text-center text-white">
+                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-200">
                   Order Number
                 </p>
 
-                <p className="mt-2 break-all text-2xl font-black text-white">
+                <p className="mt-1.5 break-all text-xl font-black sm:text-2xl">
                   {orderResult.order_number}
                 </p>
               </div>
 
-              {/* Order Summary */}
-              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
-                <div className="flex justify-between">
+              {/* Summary */}
+
+              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex justify-between text-sm">
                   <span className="text-slate-500">
                     Subtotal
                   </span>
 
-                  <span className="font-bold text-[#172554]">
-                    ₹
-                    {orderResult.subtotal.toLocaleString(
-                      "en-IN"
+                  <span className="font-bold text-brand-navy">
+                    {formatPrice(
+                      orderResult.subtotal
                     )}
                   </span>
                 </div>
 
-                <div className="mt-3 flex justify-between">
+                <div className="mt-2.5 flex justify-between text-sm">
                   <span className="text-slate-500">
                     Delivery
                   </span>
@@ -252,43 +255,40 @@ export default function CheckoutPage() {
                     className={
                       orderResult.shipping_amount === 0
                         ? "font-bold text-emerald-600"
-                        : "font-bold text-[#172554]"
+                        : "font-bold text-brand-navy"
                     }
                   >
                     {orderResult.shipping_amount === 0
                       ? "FREE"
-                      : `₹${orderResult.shipping_amount.toLocaleString(
-                          "en-IN"
-                        )}`}
+                      : formatPrice(
+                          orderResult.shipping_amount
+                        )}
                   </span>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-                  <span className="font-black text-[#172554]">
+                <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+                  <span className="font-black text-brand-navy">
                     Total
                   </span>
 
-                  <span className="text-xl font-black text-[#f43f5e]">
-                    ₹
-                    {orderResult.total_amount.toLocaleString(
-                      "en-IN"
+                  <span className="text-xl font-black text-brand-coral">
+                    {formatPrice(
+                      orderResult.total_amount
                     )}
                   </span>
                 </div>
               </div>
 
-              {/* Payment */}
-              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left">
+              {/* COD */}
+
+              <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
                 <div className="flex items-start gap-3">
-                  <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm"
-                    aria-hidden="true"
-                  >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-lg">
                     💵
                   </span>
 
                   <div>
-                    <p className="text-sm font-extrabold text-[#172554]">
+                    <p className="text-sm font-black text-brand-navy">
                       Cash on Delivery
                     </p>
 
@@ -296,14 +296,18 @@ export default function CheckoutPage() {
                       Pay when your order is delivered.
                     </p>
                   </div>
+
+                  <span className="ml-auto shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-black text-emerald-600">
+                    COD
+                  </span>
                 </div>
 
-                <div className="mt-4 border-t border-slate-200 pt-4">
-                  <p className="text-sm font-extrabold text-[#172554]">
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <p className="text-sm font-black text-brand-navy">
                     What happens next?
                   </p>
 
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
                     Our team will review your order and
                     contact you on your mobile number for
                     confirmation and delivery details.
@@ -311,21 +315,22 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Order Actions */}
-              <div className="mt-6 grid gap-3">
+              {/* Actions */}
+
+              <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
                 <Link
                   href={`/orders/${orderResult.order_id}?mobile=${encodeURIComponent(
                     mobile
                   )}`}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#172554] py-3.5 text-sm font-extrabold text-white transition hover:bg-[#0f172a]"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-navy px-4 py-3 text-xs font-black text-white transition hover:bg-brand-dark"
                 >
-                  View Order Details
-                  <span aria-hidden="true">→</span>
+                  View Order
+                  <span>→</span>
                 </Link>
 
                 <Link
-                  href="/shop"
-                  className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-extrabold text-[#172554] transition hover:border-[#172554] hover:bg-slate-50"
+                  href="/shop/products"
+                  className="flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-black text-brand-navy transition hover:border-brand-navy hover:bg-slate-50"
                 >
                   Continue Shopping
                 </Link>
@@ -337,23 +342,27 @@ export default function CheckoutPage() {
     );
   }
 
-  /* =====================================================
+  /* =========================================================
      EMPTY CART
-  ===================================================== */
+     ========================================================= */
 
   if (cart.length === 0) {
     return (
-      <main className="min-h-screen bg-[#f8fafc] px-4 py-8 sm:py-12">
+      <main className="min-h-screen bg-[#f8fafc] px-4 py-8 sm:py-12 lg:py-16">
         <div className="mx-auto max-w-xl">
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            <div className="h-1.5 bg-[#f43f5e]" />
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="h-1 bg-brand-coral" />
 
             <div className="p-8 text-center sm:p-10">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-5xl">
                 🛒
               </div>
 
-              <h1 className="mt-5 text-2xl font-black text-[#172554]">
+              <p className="mt-5 text-[10px] font-black uppercase tracking-[0.16em] text-brand-coral">
+                Checkout
+              </p>
+
+              <h1 className="mt-2 text-2xl font-black text-brand-navy">
                 Your Cart is Empty
               </h1>
 
@@ -363,11 +372,11 @@ export default function CheckoutPage() {
               </p>
 
               <Link
-                href="/shop"
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#172554] px-7 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#0f172a]"
+                href="/shop/products"
+                className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-navy px-7 py-3.5 text-sm font-black text-white transition hover:bg-brand-dark"
               >
                 Continue Shopping
-                <span aria-hidden="true">→</span>
+                <span>→</span>
               </Link>
             </div>
           </div>
@@ -376,26 +385,32 @@ export default function CheckoutPage() {
     );
   }
 
-  /* =====================================================
+  /* =========================================================
      CHECKOUT
-  ===================================================== */
+     ========================================================= */
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] px-4 py-6 pb-12 sm:px-6 lg:py-8">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="border-b border-slate-200 pb-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <main className="min-h-screen bg-[#f8fafc] pb-24">
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
+
+      <section className="border-b border-slate-200 bg-white">
+        <div className="container-shop px-4 py-4 sm:py-5">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#f43f5e]">
-                Shree Collection
-              </p>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-xl font-black tracking-tight text-brand-navy sm:text-2xl">
+                  Checkout
+                </h1>
 
-              <h1 className="mt-1 text-2xl font-black tracking-tight text-[#172554] sm:text-3xl">
-                Checkout
-              </h1>
+                <span className="rounded-full bg-brand-navy px-2.5 py-1 text-[10px] font-black text-white">
+                  {cartCount}{" "}
+                  {cartCount === 1 ? "Item" : "Items"}
+                </span>
+              </div>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs text-slate-500">
                 Enter your delivery details to place your
                 order.
               </p>
@@ -403,34 +418,41 @@ export default function CheckoutPage() {
 
             <Link
               href="/cart"
-              className="inline-flex w-fit items-center gap-2 text-sm font-bold text-[#172554] transition hover:text-[#f43f5e]"
+              className="shrink-0 text-xs font-bold text-brand-navy transition hover:text-brand-coral"
             >
-              <span aria-hidden="true">←</span>
-              Back to Cart
+              ← Back to Cart
             </Link>
           </div>
         </div>
+      </section>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="container-shop px-4 py-5 sm:py-7">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start">
           {/* =================================================
               DELIVERY FORM
-          ================================================= */}
+              ================================================= */}
 
           <form
             onSubmit={handleSubmit}
-            className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
           >
+            {/* Section heading */}
+
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#172554] text-lg text-white">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-navy text-base text-white">
                 📍
               </div>
 
               <div>
-                <h2 className="text-lg font-black text-[#172554]">
+                <p className="text-[9px] font-black uppercase tracking-[0.14em] text-brand-coral">
+                  Delivery
+                </p>
+
+                <h2 className="mt-0.5 text-lg font-black text-brand-navy">
                   Delivery Details
                 </h2>
 
-                <p className="mt-0.5 text-xs leading-5 text-slate-500">
+                <p className="mt-0.5 text-[10px] leading-4 text-slate-500">
                   Enter the address where you want your
                   order delivered.
                 </p>
@@ -438,11 +460,12 @@ export default function CheckoutPage() {
             </div>
 
             <div className="mt-6 space-y-4">
-              {/* Full Name */}
+              {/* Name */}
+
               <div>
                 <label
                   htmlFor="customerName"
-                  className="mb-1.5 block text-sm font-extrabold text-[#172554]"
+                  className="mb-1.5 block text-xs font-black text-brand-navy"
                 >
                   Full Name
                 </label>
@@ -457,49 +480,57 @@ export default function CheckoutPage() {
                   placeholder="Enter your full name"
                   autoComplete="name"
                   required
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#f43f5e] focus:ring-4 focus:ring-[#f43f5e]/10"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-coral focus:ring-4 focus:ring-brand-coral/10"
                 />
               </div>
 
               {/* Mobile */}
+
               <div>
                 <label
                   htmlFor="mobile"
-                  className="mb-1.5 block text-sm font-extrabold text-[#172554]"
+                  className="mb-1.5 block text-xs font-black text-brand-navy"
                 >
                   Mobile Number
                 </label>
 
-                <input
-                  id="mobile"
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
-                  value={mobile}
-                  onChange={(event) =>
-                    setMobile(
-                      event.target.value.replace(
-                        /\D/g,
-                        ""
-                      )
-                    )
-                  }
-                  placeholder="10-digit mobile number"
-                  autoComplete="tel"
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#f43f5e] focus:ring-4 focus:ring-[#f43f5e]/10"
-                />
+                <div className="flex overflow-hidden rounded-xl border border-slate-200 focus-within:border-brand-coral focus-within:ring-4 focus-within:ring-brand-coral/10">
+                  <span className="flex items-center border-r border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-500">
+                    +91
+                  </span>
 
-                <p className="mt-1.5 text-[11px] leading-4 text-slate-400">
+                  <input
+                    id="mobile"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    value={mobile}
+                    onChange={(event) =>
+                      setMobile(
+                        event.target.value.replace(
+                          /\D/g,
+                          ""
+                        )
+                      )
+                    }
+                    placeholder="10-digit mobile number"
+                    autoComplete="tel"
+                    required
+                    className="min-w-0 flex-1 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                  />
+                </div>
+
+                <p className="mt-1 text-[9px] text-slate-400">
                   Used for order confirmation and tracking.
                 </p>
               </div>
 
               {/* Address */}
+
               <div>
                 <label
                   htmlFor="address"
-                  className="mb-1.5 block text-sm font-extrabold text-[#172554]"
+                  className="mb-1.5 block text-xs font-black text-brand-navy"
                 >
                   Full Address
                 </label>
@@ -511,19 +542,20 @@ export default function CheckoutPage() {
                     setAddress(event.target.value)
                   }
                   placeholder="House no, street, area, landmark"
-                  rows={3}
+                  rows={4}
                   autoComplete="street-address"
                   required
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#f43f5e] focus:ring-4 focus:ring-[#f43f5e]/10"
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-coral focus:ring-4 focus:ring-brand-coral/10"
                 />
               </div>
 
-              {/* City + State */}
+              {/* City / State */}
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label
                     htmlFor="city"
-                    className="mb-1.5 block text-sm font-extrabold text-[#172554]"
+                    className="mb-1.5 block text-xs font-black text-brand-navy"
                   >
                     City
                   </label>
@@ -538,14 +570,14 @@ export default function CheckoutPage() {
                     placeholder="City"
                     autoComplete="address-level2"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#f43f5e] focus:ring-4 focus:ring-[#f43f5e]/10"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-coral focus:ring-4 focus:ring-brand-coral/10"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="state"
-                    className="mb-1.5 block text-sm font-extrabold text-[#172554]"
+                    className="mb-1.5 block text-xs font-black text-brand-navy"
                   >
                     State
                   </label>
@@ -560,16 +592,17 @@ export default function CheckoutPage() {
                     placeholder="State"
                     autoComplete="address-level1"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#f43f5e] focus:ring-4 focus:ring-[#f43f5e]/10"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-coral focus:ring-4 focus:ring-brand-coral/10"
                   />
                 </div>
               </div>
 
               {/* Pincode */}
+
               <div>
                 <label
                   htmlFor="pincode"
-                  className="mb-1.5 block text-sm font-extrabold text-[#172554]"
+                  className="mb-1.5 block text-xs font-black text-brand-navy"
                 >
                   Pincode
                 </label>
@@ -591,21 +624,19 @@ export default function CheckoutPage() {
                   placeholder="6-digit pincode"
                   autoComplete="postal-code"
                   required
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#f43f5e] focus:ring-4 focus:ring-[#f43f5e]/10"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-coral focus:ring-4 focus:ring-brand-coral/10"
                 />
               </div>
             </div>
 
             {/* Error */}
+
             {errorMessage && (
               <div
                 role="alert"
-                className="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-5 text-red-600"
+                className="mt-5 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold leading-5 text-red-600"
               >
-                <span
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-black"
-                  aria-hidden="true"
-                >
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 text-[10px] font-black">
                   !
                 </span>
 
@@ -613,37 +644,36 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Payment Method */}
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-start gap-3">
-                <span
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm"
-                  aria-hidden="true"
-                >
+            {/* Payment */}
+
+            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
                   💵
                 </span>
 
                 <div className="min-w-0">
-                  <p className="text-sm font-extrabold text-[#172554]">
+                  <p className="text-sm font-black text-brand-navy">
                     Cash on Delivery
                   </p>
 
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                  <p className="mt-0.5 text-[10px] leading-4 text-slate-500">
                     Pay when your order is delivered.
                   </p>
                 </div>
 
-                <span className="ml-auto shrink-0 rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-extrabold text-emerald-600">
+                <span className="ml-auto shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-[9px] font-black text-emerald-600">
                   Available
                 </span>
               </div>
             </div>
 
-            {/* Place Order */}
+            {/* Place order */}
+
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#172554] py-4 text-sm font-extrabold text-white transition hover:bg-[#0f172a] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-coral py-3.5 text-sm font-black text-white shadow-sm transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? (
                 <>
@@ -657,170 +687,251 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   Place Order
-                  <span aria-hidden="true">•</span>
-                  ₹
-                  {grandTotal.toLocaleString("en-IN")}
+                  <span>•</span>
+                  {formatPrice(grandTotal)}
                 </>
               )}
             </button>
 
-            <p className="mt-3 text-center text-[11px] text-slate-400">
+            <p className="mt-2.5 text-center text-[9px] text-slate-400">
               🔒 Your order details are securely processed.
             </p>
           </form>
 
           {/* =================================================
               ORDER SUMMARY
-          ================================================= */}
+              ================================================= */}
 
-          <aside className="h-fit overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-md lg:sticky lg:top-24">
-            <div className="border-b border-slate-200 bg-[#172554] px-5 py-5 text-white">
-              <h2 className="text-lg font-black">
-                Order Summary
-              </h2>
+          <aside className="h-fit lg:sticky lg:top-24">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              {/* Header */}
 
-              <p className="mt-0.5 text-xs text-blue-100">
-                {cartCount} item
-                {cartCount !== 1 ? "s" : ""}
-              </p>
-            </div>
+              <div className="bg-brand-navy px-4 py-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-black">
+                      Order Summary
+                    </h2>
 
-            <div className="p-5">
-              {/* Products */}
-              <div className="space-y-4">
-                {cart.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex gap-3"
-                  >
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-                      {item.image ? (
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="h-full w-full object-contain p-1"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-2xl">
-                          🎁
-                        </div>
-                      )}
-
-                      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f43f5e] px-1 text-[10px] font-extrabold text-white">
-                        {item.quantity}
-                      </span>
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 text-sm font-extrabold leading-5 text-[#172554]">
-                        {item.name}
-                      </p>
-
-                      <p className="mt-1 text-xs text-slate-400">
-                        ₹
-                        {item.price.toLocaleString(
-                          "en-IN"
-                        )}{" "}
-                        × {item.quantity}
-                      </p>
-                    </div>
-
-                    <p className="whitespace-nowrap text-sm font-black text-[#172554]">
-                      ₹
-                      {(
-                        item.price * item.quantity
-                      ).toLocaleString("en-IN")}
+                    <p className="mt-0.5 text-[10px] text-blue-100">
+                      {cartCount}{" "}
+                      {cartCount === 1 ? "item" : "items"}
                     </p>
                   </div>
-                ))}
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+                    🛍️
+                  </div>
+                </div>
               </div>
 
-              {/* Free Delivery Progress */}
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                {freeDeliveryRemaining > 0 ? (
-                  <>
-                    <p className="text-xs font-semibold leading-5 text-slate-600">
-                      Add{" "}
-                      <span className="font-black text-[#172554]">
-                        ₹
-                        {freeDeliveryRemaining.toLocaleString(
-                          "en-IN"
+              <div className="p-4">
+                {/* Products */}
+
+                <div className="space-y-3">
+                  {cart.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex gap-2.5"
+                    >
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-50">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="h-full w-full object-contain p-1.5"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-xl">
+                            🎁
+                          </div>
                         )}
-                      </span>{" "}
-                      more for{" "}
-                      <span className="font-black text-emerald-600">
-                        FREE delivery
-                      </span>
-                    </p>
 
-                    <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white">
-                      <div
-                        className="h-full rounded-full bg-[#f43f5e] transition-all duration-500"
-                        style={{
-                          width: `${freeDeliveryProgress}%`,
-                        }}
-                      />
+                        <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-coral px-1 text-[8px] font-black text-white">
+                          {item.quantity}
+                        </span>
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-xs font-black leading-4 text-brand-navy">
+                          {item.name}
+                        </p>
+
+                        <p className="mt-1 text-[9px] text-slate-400">
+                          {formatPrice(item.price)} ×{" "}
+                          {item.quantity}
+                        </p>
+                      </div>
+
+                      <p className="whitespace-nowrap text-xs font-black text-brand-navy">
+                        {formatPrice(
+                          item.price * item.quantity
+                        )}
+                      </p>
                     </div>
-                  </>
-                ) : (
-                  <p className="text-center text-xs font-extrabold text-emerald-600">
-                    🎉 You have FREE delivery!
-                  </p>
-                )}
+                  ))}
+                </div>
+
+                {/* Free delivery */}
+
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  {freeDeliveryRemaining > 0 ? (
+                    <>
+                      <div className="flex items-start gap-2">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-sm shadow-sm">
+                          🚚
+                        </span>
+
+                        <p className="text-[10px] font-semibold leading-4 text-slate-600">
+                          Add{" "}
+                          <span className="font-black text-brand-navy">
+                            {formatPrice(
+                              freeDeliveryRemaining
+                            )}
+                          </span>{" "}
+                          more for{" "}
+                          <span className="font-black text-emerald-600">
+                            FREE delivery
+                          </span>
+                        </p>
+                      </div>
+
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white">
+                        <div
+                          className="h-full rounded-full bg-brand-coral transition-all duration-500"
+                          style={{
+                            width: `${freeDeliveryProgress}%`,
+                          }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-center text-[10px] font-black text-emerald-600">
+                      🎉 You have FREE delivery!
+                    </p>
+                  )}
+                </div>
+
+                {/* Totals */}
+
+                <div className="mt-5 border-t border-slate-200 pt-4">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-500">
+                      Subtotal
+                    </span>
+
+                    <span className="font-bold text-brand-navy">
+                      {formatPrice(cartTotal)}
+                    </span>
+                  </div>
+
+                  <div className="mt-2.5 flex justify-between text-xs">
+                    <span className="text-slate-500">
+                      Delivery
+                    </span>
+
+                    <span
+                      className={
+                        deliveryCharge === 0
+                          ? "font-bold text-emerald-600"
+                          : "font-bold text-brand-navy"
+                      }
+                    >
+                      {deliveryCharge === 0
+                        ? "FREE"
+                        : formatPrice(deliveryCharge)}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+                    <div>
+                      <span className="text-sm font-black text-brand-navy">
+                        Total
+                      </span>
+
+                      <span className="mt-0.5 block text-[9px] text-slate-400">
+                        Inclusive of delivery
+                      </span>
+                    </div>
+
+                    <span className="text-xl font-black text-brand-coral">
+                      {formatPrice(grandTotal)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Back to cart */}
+
+                <Link
+                  href="/cart"
+                  className="mt-4 flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-brand-navy transition hover:border-brand-navy hover:bg-slate-50"
+                >
+                  ← Back to Cart
+                </Link>
+
+                {/* Trust */}
+
+                <div className="mt-4 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
+                  <div>
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-sm">
+                      🔒
+                    </div>
+
+                    <p className="mt-1 text-[8px] font-bold text-slate-400">
+                      Secure
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-sm">
+                      🚚
+                    </div>
+
+                    <p className="mt-1 text-[8px] font-bold text-slate-400">
+                      Delivery
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-sm">
+                      🎁
+                    </div>
+
+                    <p className="mt-1 text-[8px] font-bold text-slate-400">
+                      Quality
+                    </p>
+                  </div>
+                </div>
               </div>
-
-              {/* Totals */}
-              <div className="mt-5 border-t border-slate-200 pt-5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">
-                    Subtotal
-                  </span>
-
-                  <span className="font-bold text-[#172554]">
-                    ₹
-                    {cartTotal.toLocaleString("en-IN")}
-                  </span>
-                </div>
-
-                <div className="mt-3 flex justify-between text-sm">
-                  <span className="text-slate-500">
-                    Delivery
-                  </span>
-
-                  <span
-                    className={
-                      deliveryCharge === 0
-                        ? "font-bold text-emerald-600"
-                        : "font-bold text-[#172554]"
-                    }
-                  >
-                    {deliveryCharge === 0
-                      ? "FREE"
-                      : `₹${deliveryCharge}`}
-                  </span>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-                  <span className="font-black text-[#172554]">
-                    Total
-                  </span>
-
-                  <span className="text-xl font-black text-[#f43f5e]">
-                    ₹
-                    {grandTotal.toLocaleString("en-IN")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Back to Cart */}
-              <Link
-                href="/cart"
-                className="mt-5 flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#172554] transition hover:border-[#172554] hover:bg-slate-50"
-              >
-                ← Back to Cart
-              </Link>
             </div>
           </aside>
+        </div>
+      </div>
+
+      {/* =====================================================
+          MOBILE PLACE ORDER BAR
+          ===================================================== */}
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-2xl items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+              Pay on delivery
+            </p>
+
+            <p className="truncate text-lg font-black text-brand-navy">
+              {formatPrice(grandTotal)}
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            form="checkout-form"
+            disabled={isSubmitting}
+            className="min-h-11 flex-1 rounded-xl bg-brand-coral px-5 text-sm font-black text-white transition hover:bg-rose-600 disabled:opacity-60"
+          >
+            Place Order →
+          </button>
         </div>
       </div>
     </main>

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,10 +16,6 @@ type Product = {
   category_id: string | null;
 };
 
-/* ============================================================
-   Category Icons
-============================================================ */
-
 const categoryIcons: Record<string, string> = {
   "party-items": "🎉",
   "gift-items": "🎁",
@@ -33,18 +28,12 @@ const categoryIcons: Record<string, string> = {
   statues: "🛕",
 };
 
-/* ============================================================
-   Footer
-============================================================ */
-
 export default function Footer() {
   const pathname = usePathname();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  /* ==========================================================
-     Load categories that currently contain products
-  ========================================================== */
+  const [categories, setCategories] = useState<Category[]>(
+    []
+  );
 
   useEffect(() => {
     async function loadCategories() {
@@ -91,9 +80,7 @@ export default function Footer() {
 
         const productCategoryIds = new Set(
           products
-            .map(
-              (product) => product.category_id
-            )
+            .map((product) => product.category_id)
             .filter(Boolean)
         );
 
@@ -104,20 +91,15 @@ export default function Footer() {
             }
 
             if (
-              productCategoryIds.has(
-                category.id
-              )
+              productCategoryIds.has(category.id)
             ) {
               return true;
             }
 
             return subcategories.some(
               (subcategory) =>
-                subcategory.parent_id ===
-                  category.id &&
-                productCategoryIds.has(
-                  subcategory.id
-                )
+                subcategory.parent_id === category.id &&
+                productCategoryIds.has(subcategory.id)
             );
           });
 
@@ -133,62 +115,65 @@ export default function Footer() {
     loadCategories();
   }, []);
 
-  /* ==========================================================
-     Admin has its own layout
-  ========================================================== */
-
   if (pathname.startsWith("/admin")) {
     return null;
   }
 
   return (
-    <footer className="mt-12 bg-[#0f172a] text-white">
+    <footer className="mt-10 bg-[#0f172a] text-white sm:mt-14">
+      {/* =====================================================
+          TOP FOOTER
+          ===================================================== */}
 
-      {/* ======================================================
-          Main Footer
-      ======================================================= */}
-
-      <div className="container-shop py-10 sm:py-12">
-
-        <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[1.45fr_0.8fr_1fr_1.2fr] lg:gap-12">
-
-          {/* ==================================================
-              Brand
-          =================================================== */}
+      <div className="container-shop px-4 py-9 sm:py-11">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.75fr_1fr_1.1fr] lg:gap-10">
+          {/* =================================================
+              BRAND
+              ================================================= */}
 
           <div>
             <Link
               href="/"
-              className="inline-flex items-center"
               aria-label="Shree Collection home"
+              className="inline-block leading-none"
             >
-              <Image
-                src="/logo.png"
-                alt="Shree Collection"
-                width={190}
-                height={70}
-                className="h-12 w-auto object-contain object-left"
-              />
+              <div className="font-serif text-xl font-black tracking-tight text-white sm:text-2xl">
+                Shree Collection
+              </div>
+
+              <div className="mt-1.5 text-[10px] font-medium tracking-[0.08em] text-slate-400 sm:text-[11px]">
+                श्री कलेक्शन
+              </div>
             </Link>
 
-            <p className="mt-4 max-w-xs text-xs leading-5 text-slate-400">
-              Trending gifts, toys, party essentials,
-              stationery, ladies bags, key chains,
-              divine decor and more.
+            <p className="mt-4 max-w-sm text-xs leading-5 text-slate-400">
+              Discover trending gifts, toys, party essentials,
+              stationery, accessories, divine décor and unique
+              products for every occasion.
             </p>
 
-            <div className="mt-4 flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand-coral" />
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[9px] font-bold text-slate-400">
+                🎁 Gifts
+              </span>
 
-              <span className="text-[10px] font-semibold text-slate-400">
-                Gifts for Every Occasion
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[9px] font-bold text-slate-400">
+                🧸 Toys
+              </span>
+
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[9px] font-bold text-slate-400">
+                🎉 Party
+              </span>
+
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[9px] font-bold text-slate-400">
+                🚚 PAN India
               </span>
             </div>
           </div>
 
-          {/* ==================================================
-              Quick Links
-          =================================================== */}
+          {/* =================================================
+              QUICK LINKS
+              ================================================= */}
 
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-white">
@@ -196,111 +181,88 @@ export default function Footer() {
             </h3>
 
             <nav className="mt-4 flex flex-col gap-2.5">
-              <Link
-                href="/shop"
-                className="text-xs font-medium text-slate-400 transition-colors hover:text-white"
-              >
-                Shop
-              </Link>
-
-              <Link
-                href="/shop/products"
-                className="text-xs font-medium text-slate-400 transition-colors hover:text-white"
-              >
-                All Products
-              </Link>
-
-              <Link
-                href="/about"
-                className="text-xs font-medium text-slate-400 transition-colors hover:text-white"
-              >
-                About Us
-              </Link>
-
-              <Link
-                href="/contact"
-                className="text-xs font-medium text-slate-400 transition-colors hover:text-white"
-              >
-                Contact Us
-              </Link>
-
-              <Link
-                href="/wholesale"
-                className="text-xs font-medium text-slate-400 transition-colors hover:text-white"
-              >
-                Wholesale
-              </Link>
+              {[
+                ["Shop", "/shop"],
+                ["All Products", "/shop/products"],
+                ["Track Order", "/orders"],
+                ["About Us", "/about"],
+                ["Contact Us", "/contact"],
+                ["Wholesale", "/wholesale"],
+              ].map(([label, href]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-xs font-medium text-slate-400 transition hover:text-white"
+                >
+                  {label}
+                </Link>
+              ))}
             </nav>
           </div>
 
-          {/* ==================================================
-              Categories
-          =================================================== */}
+          {/* =================================================
+              CATEGORIES
+              ================================================= */}
 
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-white">
-              Shop Categories
-            </h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-white">
+                Shop Categories
+              </h3>
 
-            <div className="mt-4 flex flex-col gap-2.5">
+              <Link
+                href="/shop/products"
+                className="text-[9px] font-bold text-slate-500 transition hover:text-white"
+              >
+                View All
+              </Link>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5">
               {categories.length > 0 ? (
-                categories
-                  .slice(0, 7)
-                  .map((category) => (
-                    <Link
-                      key={category.id}
-                      href={`/categories/${category.slug}`}
-                      className="group flex items-center gap-2 text-xs font-medium text-slate-400 transition-colors hover:text-white"
-                    >
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/[0.06] text-[11px] transition-colors group-hover:bg-white/10">
-                        {categoryIcons[
-                          category.slug
-                        ] || "•"}
-                      </span>
+                categories.slice(0, 8).map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/categories/${category.slug}`}
+                    className="group flex min-w-0 items-center gap-1.5 text-xs font-medium text-slate-400 transition hover:text-white"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/[0.06] text-[11px] transition group-hover:bg-brand-coral/10">
+                      {categoryIcons[category.slug] || "•"}
+                    </span>
 
-                      <span className="truncate">
-                        {category.name}
-                      </span>
-                    </Link>
-                  ))
+                    <span className="truncate">
+                      {category.name}
+                    </span>
+                  </Link>
+                ))
               ) : (
                 <Link
                   href="/shop/products"
-                  className="text-xs font-medium text-slate-400 transition-colors hover:text-white"
+                  className="col-span-2 text-xs font-medium text-slate-400 transition hover:text-white"
                 >
                   Browse all products →
-                </Link>
-              )}
-
-              {categories.length > 7 && (
-                <Link
-                  href="/shop/products"
-                  className="mt-0.5 text-[10px] font-bold text-slate-300 transition hover:text-white"
-                >
-                  View all categories →
                 </Link>
               )}
             </div>
           </div>
 
-          {/* ==================================================
-              Contact
-          =================================================== */}
+          {/* =================================================
+              CONTACT
+              ================================================= */}
 
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-white">
               Contact Us
             </h3>
 
-            <div className="mt-4 space-y-4">
-
+            <div className="mt-4 space-y-3">
               {/* Phone */}
+
               <a
                 href="tel:8796780766"
                 className="group flex items-center gap-3"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xs transition-colors group-hover:border-white/20 group-hover:bg-white/[0.08]"
-                >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xs transition group-hover:border-brand-coral/30 group-hover:bg-brand-coral/10">
                   📞
                 </span>
 
@@ -309,19 +271,19 @@ export default function Footer() {
                     Call Us
                   </p>
 
-                  <p className="mt-0.5 text-xs font-bold text-slate-300 transition-colors group-hover:text-white">
+                  <p className="mt-0.5 text-xs font-bold text-slate-300 transition group-hover:text-white">
                     8796780766
                   </p>
                 </div>
               </a>
 
               {/* Email */}
+
               <a
                 href="mailto:myshreecollection@gmail.com"
                 className="group flex items-center gap-3"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xs transition-colors group-hover:border-white/20 group-hover:bg-white/[0.08]"
-                >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-xs transition group-hover:border-brand-coral/30 group-hover:bg-brand-coral/10">
                   ✉️
                 </span>
 
@@ -330,19 +292,20 @@ export default function Footer() {
                     Email
                   </p>
 
-                  <p className="mt-0.5 truncate text-xs font-bold text-slate-300 transition-colors group-hover:text-white">
+                  <p className="mt-0.5 truncate text-xs font-bold text-slate-300 transition group-hover:text-white">
                     myshreecollection@gmail.com
                   </p>
                 </div>
               </a>
 
               {/* Wholesale */}
+
               <Link
                 href="/wholesale"
-                className="mt-1 inline-flex w-full items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2.5 text-xs font-bold text-white transition hover:border-brand-coral/40 hover:bg-brand-coral/10 sm:w-fit"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-bold text-white transition hover:border-brand-coral/30 hover:bg-brand-coral/10 sm:w-fit"
               >
                 🏪 Wholesale Shopping
-                <span className="ml-1.5 text-slate-400">
+                <span className="ml-1.5 text-slate-500">
                   →
                 </span>
               </Link>
@@ -350,67 +313,148 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* ====================================================
-            Compact Help Strip
-        ===================================================== */}
+        {/* ===================================================
+            SERVICE STRIP
+            =================================================== */}
 
-        <div className="mt-9 rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-4 sm:px-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-9 grid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] sm:grid-cols-3">
+          <div className="flex items-center gap-3 border-b border-white/10 p-4 sm:border-b-0 sm:border-r">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-sm">
+              🚚
+            </span>
 
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-coral" />
+            <div>
+              <p className="text-xs font-black text-white">
+                PAN India Delivery
+              </p>
 
-                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">
-                  Need Help?
-                </p>
-              </div>
-
-              <p className="mt-1.5 text-sm font-bold text-white">
-                Looking for something special?
-                <span className="ml-1 font-medium text-slate-500">
-                  We are happy to help.
-                </span>
+              <p className="mt-0.5 text-[9px] text-slate-500">
+                We deliver across India
               </p>
             </div>
+          </div>
 
-            <div className="flex shrink-0 gap-2">
-              <a
-                href="tel:8796780766"
-                className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-xs font-black text-brand-navy transition hover:bg-slate-100"
-              >
-                📞 Call Us
-              </a>
+          <div className="flex items-center gap-3 border-b border-white/10 p-4 sm:border-b-0 sm:border-r">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-sm">
+              💵
+            </span>
 
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-lg border border-white/15 px-4 py-2.5 text-xs font-bold text-white transition hover:border-white/25 hover:bg-white/5"
-              >
-                Contact Us
-                <span className="ml-1">
-                  →
-                </span>
-              </Link>
+            <div>
+              <p className="text-xs font-black text-white">
+                Cash on Delivery
+              </p>
+
+              <p className="mt-0.5 text-[9px] text-slate-500">
+                Pay when delivered
+              </p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-4">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-sm">
+              🎁
+            </span>
+
+            <div>
+              <p className="text-xs font-black text-white">
+                Gifts for Every Occasion
+              </p>
+
+              <p className="mt-0.5 text-[9px] text-slate-500">
+                Find something special
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ===================================================
+            HELP STRIP
+            =================================================== */}
+
+        <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div>
+            <p className="text-xs font-black text-white">
+              Looking for something special?
+            </p>
+
+            <p className="mt-0.5 text-[10px] text-slate-500">
+              Need help finding a product? Contact our team.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <a
+              href="tel:8796780766"
+              className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-xs font-black text-brand-navy transition hover:bg-slate-100"
+            >
+              📞 Call Us
+            </a>
+
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center rounded-lg border border-white/15 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/5"
+            >
+              Contact Us →
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* ======================================================
-          Bottom Bar
-      ======================================================= */}
+      {/* =====================================================
+          BOTTOM BAR
+          ===================================================== */}
 
       <div className="border-t border-white/10">
-        <div className="container-shop flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
-
+        <div className="container-shop flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[10px] font-medium text-slate-500">
             © {new Date().getFullYear()} Shree Collection.
             All rights reserved.
           </p>
 
-          <p className="text-[10px] font-medium text-slate-600">
-            Gifts • Toys • Party • Stationery • Divine • Wholesale
-          </p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] font-medium text-slate-600">
+            <Link
+              href="/shop/products"
+              className="transition hover:text-slate-300"
+            >
+              Gifts
+            </Link>
+
+            <span>•</span>
+
+            <Link
+              href="/shop/products"
+              className="transition hover:text-slate-300"
+            >
+              Toys
+            </Link>
+
+            <span>•</span>
+
+            <Link
+              href="/shop/products"
+              className="transition hover:text-slate-300"
+            >
+              Party
+            </Link>
+
+            <span>•</span>
+
+            <Link
+              href="/shop/products"
+              className="transition hover:text-slate-300"
+            >
+              Stationery
+            </Link>
+
+            <span>•</span>
+
+            <Link
+              href="/wholesale"
+              className="transition hover:text-slate-300"
+            >
+              Wholesale
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

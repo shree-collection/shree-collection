@@ -26,11 +26,13 @@ export async function GET(request: Request) {
     const supabase = await createClient();
 
     /* ======================================================
-       Find all retail orders for this mobile number
-       Most recent orders first.
+       Find orders using mobile number
     ====================================================== */
 
-    const { data: orders, error } = await supabase
+    const {
+      data: orders,
+      error,
+    } = await supabase
       .from("orders")
       .select(`
         id,
@@ -49,7 +51,6 @@ export async function GET(request: Request) {
         created_at
       `)
       .eq("shipping_phone", mobile)
-      .eq("order_type", "retail")
       .order("created_at", {
         ascending: false,
       });
@@ -74,10 +75,25 @@ export async function GET(request: Request) {
     }
 
     /* ======================================================
-       No orders found
+       Keep retail orders only
     ====================================================== */
 
-    if (!orders || orders.length === 0) {
+    const retailOrders =
+      (orders || []).filter(
+        (order) =>
+          order.order_type === "retail"
+      );
+
+    /* ======================================================
+       No retail orders found
+    ====================================================== */
+
+    if (retailOrders.length === 0) {
+      console.log(
+        "No retail orders found for mobile:",
+        mobile
+      );
+
       return NextResponse.json(
         {
           orders: [],
@@ -93,7 +109,7 @@ export async function GET(request: Request) {
     ====================================================== */
 
     return NextResponse.json({
-      orders,
+      orders: retailOrders,
     });
   } catch (error) {
     console.error(

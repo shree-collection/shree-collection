@@ -1,6 +1,8 @@
 import AllProductsClient from "./AllProductsClient";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export type ShopCategory = {
   id: string;
   name: string;
@@ -27,10 +29,13 @@ export type ShopProduct = {
 export default async function AllProductsPage() {
   const supabase = await createClient();
 
-  const [
-    categoriesResult,
-    productsResult,
-  ] = await Promise.all([
+  /*
+   * Load categories and products in parallel.
+   *
+   * Keeping these queries independent avoids waiting for one
+   * request to finish before starting the other.
+   */
+  const [categoriesResult, productsResult] = await Promise.all([
     supabase
       .from("categories")
       .select(
@@ -52,30 +57,36 @@ export default async function AllProductsPage() {
       }),
   ]);
 
+  /*
+   * Log server-side errors but keep the page usable.
+   *
+   * This preserves the existing behavior where an empty array
+   * is passed to the client if a query fails.
+   */
   if (categoriesResult.error) {
     console.error(
-      "Unable to load categories:",
+      "Unable to load shop categories:",
       categoriesResult.error
     );
   }
 
   if (productsResult.error) {
     console.error(
-      "Unable to load products:",
+      "Unable to load shop products:",
       productsResult.error
     );
   }
 
+  const categories: ShopCategory[] =
+    (categoriesResult.data as ShopCategory[] | null) ?? [];
+
+  const products: ShopProduct[] =
+    (productsResult.data as ShopProduct[] | null) ?? [];
+
   return (
     <AllProductsClient
-      categories={
-        (categoriesResult.data ||
-          []) as ShopCategory[]
-      }
-      products={
-        (productsResult.data ||
-          []) as ShopProduct[]
-      }
+      categories={categories}
+      products={products}
     />
   );
 }

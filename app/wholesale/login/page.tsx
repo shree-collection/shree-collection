@@ -60,23 +60,26 @@ export default function WholesaleLoginPage() {
 
   return (
     <main className="min-h-screen bg-[#fffdf7]">
-      <div className="container-shop flex min-h-screen items-center px-4 py-8 sm:py-12">
+      <div className="container-shop flex min-h-screen items-center px-4 py-8 sm:px-6 sm:py-12">
         <div className="mx-auto w-full max-w-md">
-
-          {/* Brand Name */}
+          {/* Brand */}
           <div className="text-center">
             <Link
               href="/"
-              className="inline-flex flex-col items-center"
+              className="inline-flex flex-col items-center leading-none"
             >
-              <p className="text-2xl font-black tracking-tight text-[#172554] sm:text-3xl">
-                SHREE COLLECTION | श्री कलेक्शन
-              </p>
+              <span className="font-serif text-[23px] font-black tracking-tight text-[#172554] sm:text-[26px]">
+                Shree Collection
+              </span>
+
+              <span className="mt-1.5 text-[10px] font-bold tracking-[0.12em] text-slate-400 sm:text-[11px]">
+                श्री कलेक्शन
+              </span>
             </Link>
 
-            {/* Heading */}
-            <div className="mt-8">
-              <div className="mx-auto mb-3 flex w-fit items-center gap-2 rounded-full border border-[#f43f5e]/15 bg-[#fff1f3] px-3 py-1.5">
+            {/* Page Heading */}
+            <div className="mt-7">
+              <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-[#f43f5e]/15 bg-[#fff1f3] px-3 py-1.5">
                 <span
                   className="h-1.5 w-1.5 rounded-full bg-[#f43f5e]"
                   aria-hidden="true"
@@ -99,12 +102,11 @@ export default function WholesaleLoginPage() {
           </div>
 
           {/* Login Card */}
-          <div className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
-
+          <div className="mt-7 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             {/* Card Header */}
             <div className="bg-[#172554] px-6 py-5 text-white sm:px-7">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-xl">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-lg">
                   🏪
                 </div>
 
@@ -125,7 +127,7 @@ export default function WholesaleLoginPage() {
                 onSubmit={handleSubmit}
                 className="space-y-5"
               >
-                {/* Mobile */}
+                {/* Mobile Number */}
                 <div>
                   <label
                     htmlFor="phone"
@@ -192,7 +194,10 @@ export default function WholesaleLoginPage() {
                   />
 
                   <div className="mt-2 flex items-start gap-2">
-                    <span className="mt-0.5 text-xs">
+                    <span
+                      className="mt-0.5 text-xs"
+                      aria-hidden="true"
+                    >
                       🔐
                     </span>
 
@@ -209,7 +214,10 @@ export default function WholesaleLoginPage() {
                     role="alert"
                     className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-semibold leading-5 text-red-600"
                   >
-                    <span className="shrink-0">
+                    <span
+                      className="shrink-0"
+                      aria-hidden="true"
+                    >
                       ⚠️
                     </span>
 
@@ -221,7 +229,7 @@ export default function WholesaleLoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-xl bg-[#f43f5e] px-5 py-4 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#e11d48] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl bg-[#f43f5e] px-5 py-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-[#e11d48] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? (
                     <span className="inline-flex items-center justify-center gap-2">
@@ -245,18 +253,19 @@ export default function WholesaleLoginPage() {
                   className="mt-2 inline-flex items-center font-black text-[#172554] transition hover:text-[#f43f5e]"
                 >
                   Register Your Shop
-                  <span className="ml-1.5">
-                    →
-                  </span>
+                  <span className="ml-1.5">→</span>
                 </Link>
               </div>
             </div>
           </div>
 
           {/* Trust Points */}
-          <div className="mt-5 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-3 gap-2">
             <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-              <div className="text-lg" aria-hidden="true">
+              <div
+                className="text-lg"
+                aria-hidden="true"
+              >
                 🔒
               </div>
 
@@ -266,7 +275,10 @@ export default function WholesaleLoginPage() {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-              <div className="text-lg" aria-hidden="true">
+              <div
+                className="text-lg"
+                aria-hidden="true"
+              >
                 🏷️
               </div>
 
@@ -276,7 +288,10 @@ export default function WholesaleLoginPage() {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-              <div className="text-lg" aria-hidden="true">
+              <div
+                className="text-lg"
+                aria-hidden="true"
+              >
                 📦
               </div>
 
@@ -296,7 +311,6 @@ export default function WholesaleLoginPage() {
               Back to Store
             </Link>
           </div>
-
         </div>
       </div>
     </main>

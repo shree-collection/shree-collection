@@ -45,43 +45,62 @@ const orderStatuses = [
 function getStatusClass(status: string) {
   switch (status.toLowerCase()) {
     case "confirmed":
-      return "bg-blue-100 text-blue-700";
+      return "border-blue-100 bg-blue-50 text-blue-700";
 
     case "processing":
-      return "bg-purple-100 text-purple-700";
+      return "border-purple-100 bg-purple-50 text-purple-700";
 
     case "shipped":
-      return "bg-indigo-100 text-indigo-700";
+      return "border-orange-100 bg-orange-50 text-orange-700";
 
     case "delivered":
-      return "bg-green-100 text-green-700";
+      return "border-emerald-100 bg-emerald-50 text-emerald-700";
 
     case "cancelled":
-      return "bg-red-100 text-red-700";
+      return "border-red-100 bg-red-50 text-red-700";
 
     default:
-      return "bg-yellow-100 text-yellow-700";
+      return "border-slate-200 bg-slate-50 text-slate-600";
   }
 }
 
 function getPaymentStatusClass(status: string) {
   switch (status.toLowerCase()) {
     case "paid":
-      return "bg-green-100 text-green-700";
+      return "border-emerald-100 bg-emerald-50 text-emerald-700";
 
     case "failed":
-      return "bg-red-100 text-red-700";
+      return "border-red-100 bg-red-50 text-red-700";
 
     case "refunded":
-      return "bg-purple-100 text-purple-700";
+      return "border-purple-100 bg-purple-50 text-purple-700";
 
     default:
-      return "bg-yellow-100 text-yellow-700";
+      return "border-slate-200 bg-slate-50 text-slate-600";
   }
 }
 
 function formatStatus(status: string) {
-  return status.replace(/_/g, " ");
+  return status
+    .replace(/\_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatAmount(amount: number) {
+  return Number(amount || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatDate(date: string) {
+  return new Date(date).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function WholesaleOrderDetailsPage({
@@ -94,21 +113,11 @@ export default function WholesaleOrderDetailsPage({
   const [order, setOrder] =
     useState<WholesaleOrder | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
-  const [success, setSuccess] =
-    useState("");
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [downloadingInvoice, setDownloadingInvoice] =
     useState(false);
-
-  /* =========================================================
-     Load Order
-  ========================================================= */
 
   useEffect(() => {
     async function loadOrder() {
@@ -127,8 +136,7 @@ export default function WholesaleOrderDetailsPage({
 
         if (!response.ok) {
           throw new Error(
-            data.error ||
-              "Unable to load order."
+            data.error || "Unable to load order."
           );
         }
 
@@ -146,10 +154,6 @@ export default function WholesaleOrderDetailsPage({
 
     loadOrder();
   }, [id]);
-
-  /* =========================================================
-     Download Invoice
-  ========================================================= */
 
   async function downloadInvoice() {
     if (!order) {
@@ -170,52 +174,40 @@ export default function WholesaleOrderDetailsPage({
       );
 
       if (!response.ok) {
-        let message =
-          "Unable to download invoice.";
+        let message = "Unable to download invoice.";
 
         try {
-          const data =
-            await response.json();
+          const data = await response.json();
 
           if (data?.error) {
             message = data.error;
           }
         } catch {
-          // Ignore JSON parsing error
+          // Ignore JSON parsing error.
         }
 
         throw new Error(message);
       }
 
-      const blob =
-        await response.blob();
+      const blob = await response.blob();
 
       if (blob.size === 0) {
-        throw new Error(
-          "Invoice file is empty."
-        );
+        throw new Error("Invoice file is empty.");
       }
 
       const downloadUrl =
         window.URL.createObjectURL(blob);
 
-      const link =
-        document.createElement("a");
+      const link = document.createElement("a");
 
       link.href = downloadUrl;
-
-      link.download =
-        `Invoice-${order.order_number}.pdf`;
+      link.download = `Invoice-${order.order_number}.pdf`;
 
       document.body.appendChild(link);
-
       link.click();
-
       document.body.removeChild(link);
 
-      window.URL.revokeObjectURL(
-        downloadUrl
-      );
+      window.URL.revokeObjectURL(downloadUrl);
 
       setSuccess(
         "Invoice downloaded successfully."
@@ -236,44 +228,54 @@ export default function WholesaleOrderDetailsPage({
     }
   }
 
-  /* =========================================================
-     Loading
-  ========================================================= */
-
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#FFF9E8] p-4 sm:p-6">
-        <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow-sm">
-          <p className="text-sm text-gray-500">
+      <main className="min-h-screen bg-[#fffdf7] px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm sm:p-14">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#fff1f3] text-3xl">
+            📦
+          </div>
+
+          <p className="mt-4 text-sm font-bold text-slate-500">
             Loading order...
           </p>
+
+          <div className="mx-auto mt-4 h-1.5 w-32 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-[#f43f5e]" />
+          </div>
         </div>
       </main>
     );
   }
 
-  /* =========================================================
-     Error
-  ========================================================= */
-
   if (error && !order) {
     return (
-      <main className="min-h-screen bg-[#FFF9E8] p-4 sm:p-6">
+      <main className="min-h-screen bg-[#fffdf7] px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-5xl">
+          <div className="rounded-3xl border border-red-100 bg-red-50 p-6">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100">
+                ⚠️
+              </span>
 
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-            <p className="font-bold text-red-600">
-              {error}
-            </p>
+              <div>
+                <p className="font-black text-red-700">
+                  Unable to load order
+                </p>
+
+                <p className="mt-1 text-sm text-red-600/80">
+                  {error}
+                </p>
+              </div>
+            </div>
           </div>
 
           <Link
             href="/wholesale/orders"
-            className="mt-4 inline-block text-sm font-bold text-green-600 hover:underline"
+            className="mt-5 inline-flex items-center rounded-xl bg-[#172554] px-4 py-3 text-sm font-black text-white transition hover:bg-slate-800"
           >
             ← Back to My Orders
           </Link>
-
         </div>
       </main>
     );
@@ -288,350 +290,373 @@ export default function WholesaleOrderDetailsPage({
       order.status.toLowerCase()
     );
 
+  const isCancelled =
+    order.status.toLowerCase() === "cancelled";
+
   return (
-    <main className="min-h-screen bg-[#FFF9E8] p-4 sm:p-6">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-[#fffdf7]">
+      <div className="container-shop px-4 py-5 sm:px-6 sm:py-7">
+        {/* Breadcrumb */}
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-400">
+          <Link
+            href="/wholesale"
+            className="transition hover:text-[#f43f5e]"
+          >
+            Wholesale
+          </Link>
 
-        {/* =====================================================
-            Back
-        ===================================================== */}
+          <span>/</span>
 
-        <Link
-          href="/wholesale/orders"
-          className="text-sm font-bold text-green-600 hover:underline"
-        >
-          ← Back to My Orders
-        </Link>
+          <Link
+            href="/wholesale/orders"
+            className="transition hover:text-[#f43f5e]"
+          >
+            My Orders
+          </Link>
 
-        {/* =====================================================
-            Success Message
-        ===================================================== */}
+          <span>/</span>
 
+          <span className="text-slate-600">
+            {order.order_number}
+          </span>
+        </div>
+
+        {/* Success */}
         {success && (
-          <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4">
-            <p className="text-sm font-bold text-green-700">
-              {success}
-            </p>
-          </div>
-        )}
-
-        {/* =====================================================
-            Error Message
-        ===================================================== */}
-
-        {error && order && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
-            <p className="text-sm font-bold text-red-700">
-              {error}
-            </p>
-          </div>
-        )}
-
-        {/* =====================================================
-            Header
-        ===================================================== */}
-
-        <section className="mt-4 rounded-2xl bg-white p-5 shadow-sm">
-
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-green-600">
-                Wholesale Order
-              </p>
-
-              <h1 className="mt-1 text-2xl font-extrabold text-[#172554]">
-                {order.order_number}
-              </h1>
-
-              <p className="mt-1 text-sm text-gray-500">
-                {new Date(
-                  order.created_at
-                ).toLocaleString("en-IN")}
-              </p>
-            </div>
-
-            {/* Invoice + Status */}
-
-            <div className="flex flex-wrap items-center gap-3">
-
-              <button
-                type="button"
-                onClick={downloadInvoice}
-                disabled={downloadingInvoice}
-                className="rounded-xl bg-[#FFC928] px-4 py-3 text-sm font-extrabold text-[#172554] shadow-sm transition hover:bg-[#f5bb00] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {downloadingInvoice
-                  ? "Downloading..."
-                  : "🧾 Download Invoice"}
-              </button>
-
-              <span
-                className={`w-fit rounded-full px-4 py-2 text-sm font-bold capitalize ${getStatusClass(
-                  order.status
-                )}`}
-              >
-                {formatStatus(
-                  order.status
-                )}
+          <div className="mb-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
+                ✓
               </span>
 
+              <p className="text-sm font-bold text-emerald-700">
+                {success}
+              </p>
             </div>
-
           </div>
+        )}
 
+        {/* Error */}
+        {error && order && (
+          <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 p-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
+                ⚠️
+              </span>
+
+              <p className="text-sm font-bold text-red-700">
+                {error}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Order Header */}
+        <section className="overflow-hidden rounded-3xl bg-[#172554] shadow-sm">
+          <div className="relative p-5 text-white sm:p-7">
+            <div
+              className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/5"
+              aria-hidden="true"
+            />
+
+            <div
+              className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-[#f43f5e]/10"
+              aria-hidden="true"
+            />
+
+            <div className="relative z-10">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-white/75">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#f43f5e]" />
+                    Wholesale Order
+                  </span>
+
+                  <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">
+                    {order.order_number}
+                  </h1>
+
+                  <p className="mt-2 text-sm text-white/60">
+                    Placed on {formatDate(order.created_at)}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`rounded-full border px-3 py-2 text-xs font-black ${getStatusClass(
+                      order.status
+                    )}`}
+                  >
+                    {formatStatus(order.status)}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={downloadInvoice}
+                    disabled={downloadingInvoice}
+                    className="inline-flex items-center justify-center rounded-xl bg-[#f43f5e] px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-[#e11d48] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {downloadingInvoice
+                      ? "Downloading..."
+                      : "🧾 Download Invoice"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
-        {/* =====================================================
-            Order Progress
-        ===================================================== */}
+        {/* Progress */}
+        {!isCancelled && (
+          <section className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                  Order Tracking
+                </p>
 
-        {order.status.toLowerCase() !==
-          "cancelled" && (
-          <section className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+                <h2 className="mt-1 text-lg font-black text-[#172554]">
+                  Order Progress
+                </h2>
+              </div>
 
-            <h2 className="text-lg font-extrabold text-[#172554]">
-              Order Progress
-            </h2>
-
-            <div className="mt-6 grid grid-cols-5 gap-2">
-
-              {orderStatuses.map(
-                (status, index) => {
-
-                  const completed =
-                    currentStatusIndex >=
-                    index;
-
-                  return (
-                    <div
-                      key={status}
-                      className="text-center"
-                    >
-
-                      <div
-                        className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
-                          completed
-                            ? "bg-green-600 text-white"
-                            : "bg-gray-100 text-gray-400"
-                        }`}
-                      >
-                        {completed
-                          ? "✓"
-                          : index + 1}
-                      </div>
-
-                      <p
-                        className={`mt-2 text-[10px] font-bold capitalize sm:text-xs ${
-                          completed
-                            ? "text-green-700"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {formatStatus(
-                          status
-                        )}
-                      </p>
-
-                    </div>
-                  );
-                }
+              {currentStatusIndex >= 0 && (
+                <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[10px] font-black text-slate-500">
+                  {Math.min(
+                    currentStatusIndex + 1,
+                    orderStatuses.length
+                  )}{" "}
+                  / {orderStatuses.length}
+                </span>
               )}
-
             </div>
 
+            <div className="mt-6 overflow-x-auto pb-2">
+              <div className="flex min-w-[560px] items-start">
+                {orderStatuses.map(
+                  (status, index) => {
+                    const completed =
+                      currentStatusIndex >= index;
+
+                    return (
+                      <div
+                        key={status}
+                        className="relative flex flex-1 flex-col items-center"
+                      >
+                        {index > 0 && (
+                          <div
+                            className={`absolute right-1/2 top-3 h-0.5 w-full ${
+                              index <= currentStatusIndex
+                                ? "bg-[#172554]"
+                                : "bg-slate-200"
+                            }`}
+                          />
+                        )}
+
+                        <div
+                          className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-black ${
+                            completed
+                              ? "bg-[#172554] text-white"
+                              : "border border-slate-200 bg-white text-slate-400"
+                          }`}
+                        >
+                          {completed
+                            ? "✓"
+                            : index + 1}
+                        </div>
+
+                        <p
+                          className={`mt-2 text-center text-[10px] font-bold capitalize sm:text-xs ${
+                            completed
+                              ? "text-[#172554]"
+                              : "text-slate-400"
+                          }`}
+                        >
+                          {formatStatus(status)}
+                        </p>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </div>
           </section>
         )}
 
-        {/* =====================================================
-            Cancelled
-        ===================================================== */}
+        {/* Cancelled */}
+        {isCancelled && (
+          <section className="mt-5 rounded-3xl border border-red-100 bg-red-50 p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100">
+                ❌
+              </div>
 
-        {order.status.toLowerCase() ===
-          "cancelled" && (
-          <section className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
+              <div>
+                <p className="font-black text-red-700">
+                  This order has been cancelled.
+                </p>
 
-            <p className="font-bold text-red-700">
-              This order has been cancelled.
-            </p>
-
+                <p className="mt-1 text-sm text-red-600/80">
+                  Please contact Shree Collection if you
+                  need assistance with this order.
+                </p>
+              </div>
+            </div>
           </section>
         )}
 
-        {/* =====================================================
-            Products
-        ===================================================== */}
+        {/* Products */}
+        <section className="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-200 p-5 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                  Order Items
+                </p>
 
-        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+                <h2 className="mt-1 text-lg font-black text-[#172554]">
+                  Products
+                </h2>
+              </div>
 
-          <div className="border-b border-gray-100 p-5">
-
-            <h2 className="text-lg font-extrabold text-[#172554]">
-              Products
-            </h2>
-
+              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-500">
+                {order.items.length}{" "}
+                {order.items.length === 1
+                  ? "item"
+                  : "items"}
+              </span>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
-
             <table className="min-w-full text-left">
-
-              <thead className="bg-gray-50">
-
+              <thead className="bg-slate-50">
                 <tr>
-
-                  <th className="px-5 py-4 text-xs font-bold uppercase text-gray-500">
+                  <th className="px-5 py-4 text-[10px] font-black uppercase tracking-wide text-slate-400">
                     Product
                   </th>
 
-                  <th className="px-5 py-4 text-xs font-bold uppercase text-gray-500">
+                  <th className="px-5 py-4 text-[10px] font-black uppercase tracking-wide text-slate-400">
                     SKU
                   </th>
 
-                  <th className="px-5 py-4 text-xs font-bold uppercase text-gray-500">
+                  <th className="px-5 py-4 text-[10px] font-black uppercase tracking-wide text-slate-400">
                     Qty
                   </th>
 
-                  <th className="px-5 py-4 text-xs font-bold uppercase text-gray-500">
+                  <th className="px-5 py-4 text-[10px] font-black uppercase tracking-wide text-slate-400">
                     Price
                   </th>
 
-                  <th className="px-5 py-4 text-right text-xs font-bold uppercase text-gray-500">
+                  <th className="px-5 py-4 text-right text-[10px] font-black uppercase tracking-wide text-slate-400">
                     Total
                   </th>
-
                 </tr>
-
               </thead>
 
               <tbody>
-
-                {order.items.map(
-                  (item) => (
-                    <tr
-                      key={item.id}
-                      className="border-t border-gray-100"
-                    >
-
-                      <td className="px-5 py-4 font-bold text-[#172554]">
+                {order.items.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-t border-slate-100"
+                  >
+                    <td className="px-5 py-4">
+                      <p className="font-bold text-[#172554]">
                         {item.product_name}
-                      </td>
+                      </p>
+                    </td>
 
-                      <td className="px-5 py-4 text-sm text-gray-500">
-                        {item.sku || "—"}
-                      </td>
+                    <td className="px-5 py-4 text-sm text-slate-500">
+                      {item.sku || "—"}
+                    </td>
 
-                      <td className="px-5 py-4 font-bold">
+                    <td className="px-5 py-4">
+                      <span className="inline-flex min-w-8 justify-center rounded-lg bg-slate-100 px-2 py-1 text-xs font-black text-slate-600">
                         {item.quantity}
-                      </td>
+                      </span>
+                    </td>
 
-                      <td className="px-5 py-4 text-sm">
-                        ₹
-                        {Number(
-                          item.unit_price
-                        ).toFixed(2)}
-                      </td>
+                    <td className="px-5 py-4 text-sm font-semibold text-slate-600">
+                      ₹{formatAmount(item.unit_price)}
+                    </td>
 
-                      <td className="px-5 py-4 text-right font-extrabold text-[#172554]">
-                        ₹
-                        {Number(
-                          item.total_price
-                        ).toFixed(2)}
-                      </td>
+                    <td className="px-5 py-4 text-right font-black text-[#172554]">
+                      ₹{formatAmount(item.total_price)}
+                    </td>
+                  </tr>
+                ))}
 
-                    </tr>
-                  )
-                )}
-
-                {order.items.length ===
-                  0 && (
+                {order.items.length === 0 && (
                   <tr>
-
                     <td
                       colSpan={5}
-                      className="px-5 py-8 text-center text-sm text-gray-500"
+                      className="px-5 py-10 text-center text-sm text-slate-500"
                     >
                       No products found.
                     </td>
-
                   </tr>
                 )}
-
               </tbody>
-
             </table>
-
           </div>
-
         </section>
 
-        {/* =====================================================
-            Delivery + Payment
-        ===================================================== */}
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-
+        {/* Delivery + Payment */}
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
           {/* Delivery */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+              Shipping
+            </p>
 
-          <section className="rounded-2xl bg-white p-5 shadow-sm">
-
-            <h2 className="text-lg font-extrabold text-[#172554]">
+            <h2 className="mt-1 text-lg font-black text-[#172554]">
               Delivery Address
             </h2>
 
-            <div className="mt-5 text-sm leading-7 text-gray-600">
-
-              <p className="font-bold text-[#172554]">
-                {order.shipping_name ||
-                  "—"}
+            <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-600">
+              <p className="font-black text-[#172554]">
+                {order.shipping_name || "—"}
               </p>
 
               <p>
-                {order.shipping_phone ||
-                  "—"}
+                {order.shipping_phone || "—"}
               </p>
 
               <p className="mt-2">
-                {order.shipping_address ||
-                  "—"}
+                {order.shipping_address || "—"}
               </p>
 
               <p>
-                {order.shipping_city ||
-                  ""}
-
+                {order.shipping_city || ""}
                 {order.shipping_state
                   ? `, ${order.shipping_state}`
                   : ""}
               </p>
 
               <p>
-                {order.shipping_pincode ||
-                  ""}
+                {order.shipping_pincode || ""}
               </p>
-
             </div>
-
           </section>
 
           {/* Payment */}
-
-          <section className="rounded-2xl bg-white p-5 shadow-sm">
-
-            <h2 className="text-lg font-extrabold text-[#172554]">
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
               Payment
+            </p>
+
+            <h2 className="mt-1 text-lg font-black text-[#172554]">
+              Payment Information
             </h2>
 
             <div className="mt-5 space-y-4">
-
-              <div>
-
-                <p className="text-xs font-bold uppercase text-gray-400">
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">
                   Payment Status
                 </p>
 
                 <span
-                  className={`mt-1 inline-block rounded-full px-3 py-1 text-xs font-bold capitalize ${getPaymentStatusClass(
+                  className={`mt-2 inline-flex rounded-full border px-3 py-1.5 text-xs font-black ${getPaymentStatusClass(
                     order.payment_status
                   )}`}
                 >
@@ -639,122 +664,90 @@ export default function WholesaleOrderDetailsPage({
                     order.payment_status
                   )}
                 </span>
-
               </div>
 
-              <div>
-
-                <p className="text-xs font-bold uppercase text-gray-400">
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">
                   Payment Method
                 </p>
 
-                <p className="mt-1 text-sm font-bold capitalize text-[#172554]">
+                <p className="mt-2 text-sm font-black capitalize text-[#172554]">
                   {order.payment_method ||
                     "Not provided"}
                 </p>
-
               </div>
-
             </div>
-
           </section>
-
         </div>
 
-        {/* =====================================================
-            Order Summary
-        ===================================================== */}
+        {/* Order Summary */}
+        <section className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                Payment Summary
+              </p>
 
-        <section className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
-
-          <h2 className="text-lg font-extrabold text-[#172554]">
-            Order Summary
-          </h2>
-
-          <div className="ml-auto mt-5 max-w-md space-y-3">
-
-            <div className="flex justify-between text-sm">
-
-              <span className="text-gray-500">
-                Subtotal
-              </span>
-
-              <span className="font-bold">
-                ₹
-                {Number(
-                  order.subtotal
-                ).toFixed(2)}
-              </span>
-
+              <h2 className="mt-1 text-lg font-black text-[#172554]">
+                Order Summary
+              </h2>
             </div>
 
-            <div className="flex justify-between text-sm">
-
-              <span className="text-gray-500">
-                Shipping
-              </span>
-
-              <span className="font-bold">
-
-                {Number(
-                  order.shipping_amount
-                ) === 0
-                  ? "FREE"
-                  : `₹${Number(
-                      order.shipping_amount
-                    ).toFixed(2)}`}
-
-              </span>
-
-            </div>
-
-            <div className="flex justify-between text-sm">
-
-              <span className="text-gray-500">
-                Discount
-              </span>
-
-              <span className="font-bold">
-                ₹
-                {Number(
-                  order.discount_amount
-                ).toFixed(2)}
-              </span>
-
-            </div>
-
-            <div className="border-t border-gray-100 pt-3">
-
-              <div className="flex justify-between">
-
-                <span className="font-extrabold text-[#172554]">
-                  Total
+            <div className="w-full max-w-md space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">
+                  Subtotal
                 </span>
 
-                <span className="text-xl font-extrabold text-green-600">
-                  ₹
-                  {Number(
-                    order.total_amount
-                  ).toFixed(2)}
+                <span className="font-bold text-slate-700">
+                  ₹{formatAmount(order.subtotal)}
                 </span>
-
               </div>
 
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">
+                  Shipping
+                </span>
+
+                <span className="font-bold text-slate-700">
+                  {Number(order.shipping_amount) === 0
+                    ? "FREE"
+                    : `₹${formatAmount(
+                        order.shipping_amount
+                      )}`}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">
+                  Discount
+                </span>
+
+                <span className="font-bold text-slate-700">
+                  ₹{formatAmount(order.discount_amount)}
+                </span>
+              </div>
+
+              <div className="border-t border-slate-200 pt-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-black text-[#172554]">
+                    Total
+                  </span>
+
+                  <span className="text-xl font-black text-[#f43f5e]">
+                    ₹{formatAmount(order.total_amount)}
+                  </span>
+                </div>
+              </div>
             </div>
-
           </div>
-
         </section>
 
-        {/* =====================================================
-            Bottom Actions
-        ===================================================== */}
-
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-
+        {/* Bottom Actions */}
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
           <Link
             href="/wholesale/orders"
-            className="rounded-xl bg-white px-5 py-3 text-center text-sm font-bold text-[#172554] shadow-sm transition hover:bg-gray-50"
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-[#172554] shadow-sm transition hover:border-[#172554] hover:bg-slate-50"
           >
             ← Back to My Orders
           </Link>
@@ -763,15 +756,13 @@ export default function WholesaleOrderDetailsPage({
             type="button"
             onClick={downloadInvoice}
             disabled={downloadingInvoice}
-            className="rounded-xl bg-[#FFC928] px-5 py-3 text-sm font-extrabold text-[#172554] shadow-sm transition hover:bg-[#f5bb00] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-xl bg-[#f43f5e] px-5 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e11d48] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {downloadingInvoice
               ? "Downloading..."
               : "🧾 Download Invoice"}
           </button>
-
         </div>
-
       </div>
     </main>
   );
