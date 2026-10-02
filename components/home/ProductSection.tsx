@@ -14,13 +14,6 @@ type ProductSectionProps = {
   icon?: string;
 };
 
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  parent_id: string | null;
-};
-
 export default async function ProductSection({
   title,
   subtitle,
@@ -32,11 +25,9 @@ export default async function ProductSection({
 }: ProductSectionProps) {
   const supabase = await createClient();
 
-  /*
-   * ------------------------------------------------------
-   * Find the main category
-   * ------------------------------------------------------
-   */
+  /* ======================================================
+     FIND CATEGORY + SUBCATEGORIES
+  ====================================================== */
 
   let categoryIds: string[] = [];
 
@@ -47,7 +38,12 @@ export default async function ProductSection({
     } = await supabase
       .from("categories")
       .select(
-        "id, name, slug, parent_id"
+        `
+          id,
+          name,
+          slug,
+          parent_id
+        `
       )
       .eq("slug", categorySlug)
       .eq("is_active", true)
@@ -66,14 +62,8 @@ export default async function ProductSection({
       return null;
     }
 
-    /*
-     * Include the main category itself.
-     */
     categoryIds.push(mainCategory.id);
 
-    /*
-     * Find all active subcategories.
-     */
     const {
       data: subcategories,
       error: subcategoryError,
@@ -90,21 +80,18 @@ export default async function ProductSection({
       );
     }
 
-    if (subcategories) {
+    if (subcategories?.length) {
       categoryIds.push(
         ...subcategories.map(
-          (subcategory) =>
-            subcategory.id
+          (subcategory) => subcategory.id
         )
       );
     }
   }
 
-  /*
-   * ------------------------------------------------------
-   * Load products
-   * ------------------------------------------------------
-   */
+  /* ======================================================
+     LOAD PRODUCTS
+  ====================================================== */
 
   let query = supabase
     .from("products")
@@ -137,10 +124,6 @@ export default async function ProductSection({
     })
     .limit(limit);
 
-  /*
-   * Filter products belonging to this main category
-   * or any of its subcategories.
-   */
   if (categoryIds.length > 0) {
     query = query.in(
       "category_id",
@@ -162,26 +145,13 @@ export default async function ProductSection({
     return null;
   }
 
-  /*
-   * ------------------------------------------------------
-   * No products
-   *
-   * Don't show an empty section.
-   * ------------------------------------------------------
-   */
-
-  if (
-    !products ||
-    products.length === 0
-  ) {
+  if (!products?.length) {
     return null;
   }
 
-  /*
-   * ------------------------------------------------------
-   * Convert database products to Product type
-   * ------------------------------------------------------
-   */
+  /* ======================================================
+     FORMAT PRODUCTS
+  ====================================================== */
 
   const sectionProducts: Product[] =
     products.map((product) => {
@@ -239,86 +209,146 @@ export default async function ProductSection({
       };
     });
 
-  /*
-   * ------------------------------------------------------
-   * Render
-   * ------------------------------------------------------
-   */
+  /* ======================================================
+     RENDER
+  ====================================================== */
 
   return (
     <section
       id={sectionId}
-      className="container-shop px-4 py-8 sm:py-10 lg:py-12"
+      className="border-b border-slate-200 bg-white"
     >
-      {/* Section Header */}
-      <div className="mb-6 flex items-end justify-between gap-4 sm:mb-7">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-soft-gold text-base">
-              {icon}
-            </span>
+      <div className="container-shop px-4 py-7 sm:py-9 lg:py-10">
 
-            <p className="truncate text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-coral">
-              Collection
+        {/* =================================================
+            SECTION HEADER
+        ================================================= */}
+
+        <div className="flex items-end justify-between gap-4">
+
+          <div className="min-w-0">
+
+            <div className="flex items-center gap-2">
+
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-base">
+                {icon}
+              </div>
+
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#f43f5e]">
+                Collection
+              </p>
+
+            </div>
+
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+
+              <h2 className="text-xl font-black tracking-tight text-[#172554] sm:text-2xl lg:text-[27px]">
+                {title}
+              </h2>
+
+              <span className="text-xs font-semibold text-slate-400">
+                {sectionProducts.length} products
+              </span>
+
+            </div>
+
+            <p className="mt-1 line-clamp-1 max-w-2xl text-xs text-slate-500 sm:text-sm">
+              {subtitle}
             </p>
+
           </div>
 
-          <h2 className="mt-2 text-2xl font-black tracking-tight text-brand-navy sm:text-3xl">
-            {title}
-          </h2>
+          {/* Desktop View All */}
 
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-text-secondary">
-            {subtitle}
-          </p>
+          <Link
+            href={viewAllHref}
+            className="group hidden shrink-0 items-center gap-1 rounded-lg px-2 py-2 text-xs font-extrabold text-[#172554] transition hover:bg-rose-50 hover:text-[#f43f5e] sm:inline-flex"
+          >
+            View All
+
+            <span className="transition-transform group-hover:translate-x-1">
+              →
+            </span>
+          </Link>
+
         </div>
 
-        <Link
-          href={viewAllHref}
-          className="group hidden shrink-0 items-center gap-1 rounded-full border border-border bg-white px-4 py-2.5 text-xs font-extrabold text-brand-navy transition hover:border-brand-gold hover:bg-brand-soft-gold sm:inline-flex"
-        >
-          View All
-          <span className="transition-transform group-hover:translate-x-0.5">
-            →
-          </span>
-        </Link>
-      </div>
+        {/* =================================================
+            PRODUCT GRID
+        ================================================= */}
 
-      {/* Mobile Product Row */}
-      <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-3 sm:hidden">
-        {sectionProducts.map(
-          (product) => (
-            <div
-              key={product.id}
-              className="w-[180px] shrink-0"
-            >
-              <ProductCard
-                product={product}
-              />
-            </div>
-          )
-        )}
-      </div>
+        <div className="mt-5">
 
-      {/* Mobile View All */}
-      <div className="mt-2 sm:hidden">
-        <Link
-          href={viewAllHref}
-          className="flex w-full items-center justify-center rounded-xl border border-border bg-white px-5 py-3 text-sm font-extrabold text-brand-navy transition hover:border-brand-gold hover:bg-brand-soft-gold"
-        >
-          View All {title} →
-        </Link>
-      </div>
+          {/* Mobile */}
 
-      {/* Tablet / Desktop Product Grid */}
-      <div className="hidden grid-cols-2 gap-4 sm:grid md:grid-cols-4 md:gap-5 lg:gap-6">
-        {sectionProducts.map(
-          (product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
-          )
-        )}
+          <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:hidden">
+
+            {sectionProducts.map(
+              (product) => (
+                <div
+                  key={product.id}
+                  className="w-[175px] shrink-0"
+                >
+                  <ProductCard
+                    product={product}
+                  />
+                </div>
+              )
+            )}
+
+          </div>
+
+          {/* Tablet */}
+
+          <div className="hidden grid-cols-2 gap-3 sm:grid md:grid-cols-4 md:gap-4 lg:hidden">
+
+            {sectionProducts.map(
+              (product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                />
+              )
+            )}
+
+          </div>
+
+          {/* Desktop */}
+
+          <div className="hidden grid-cols-4 gap-4 lg:grid xl:grid-cols-5">
+
+            {sectionProducts.map(
+              (product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                />
+              )
+            )}
+
+          </div>
+
+        </div>
+
+        {/* =================================================
+            MOBILE VIEW ALL
+        ================================================= */}
+
+        <div className="mt-4 sm:hidden">
+
+          <Link
+            href={viewAllHref}
+            className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-[#172554] transition hover:border-[#f43f5e] hover:text-[#f43f5e]"
+          >
+            View All {title}
+
+            <span className="ml-1">
+              →
+            </span>
+          </Link>
+
+        </div>
+
       </div>
     </section>
   );

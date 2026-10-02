@@ -26,8 +26,16 @@ export async function GET(request: Request) {
     const supabase = await createClient();
 
     /* ======================================================
-       Find orders using mobile number
-    ====================================================== */
+       Get orders
+       
+       We fetch shipping_phone values and normalize them
+       in application code so these formats can all work:
+       
+       9876543210
+       919876543210
+       +919876543210
+       +91 9876543210
+       ====================================================== */
 
     const {
       data: orders,
@@ -50,7 +58,6 @@ export async function GET(request: Request) {
         shipping_state,
         created_at
       `)
-      .eq("shipping_phone", mobile)
       .order("created_at", {
         ascending: false,
       });
@@ -75,25 +82,44 @@ export async function GET(request: Request) {
     }
 
     /* ======================================================
-       Keep retail orders only
+       Match mobile number
     ====================================================== */
 
-    const retailOrders =
-      (orders || []).filter(
-        (order) =>
-          order.order_type === "retail"
-      );
+    const retailOrders = (orders || []).filter(
+      (order) => {
+        if (order.order_type !== "retail") {
+          return false;
+        }
+
+        const storedMobile =
+          String(order.shipping_phone || "").replace(
+            /\D/g,
+            ""
+          );
+
+        /*
+         * Compare the last 10 digits.
+         *
+         * This allows:
+         * 9876543210
+         * 919876543210
+         * +919876543210
+         * +91 9876543210
+         */
+        const normalizedStoredMobile =
+          storedMobile.length >= 10
+            ? storedMobile.slice(-10)
+            : storedMobile;
+
+        return normalizedStoredMobile === mobile;
+      }
+    );
 
     /* ======================================================
        No retail orders found
     ====================================================== */
 
     if (retailOrders.length === 0) {
-      console.log(
-        "No retail orders found for mobile:",
-        mobile
-      );
-
       return NextResponse.json(
         {
           orders: [],

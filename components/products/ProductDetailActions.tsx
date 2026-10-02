@@ -16,10 +16,17 @@ export default function ProductDetailActions({
 
   const stock = Math.max(
     0,
-    product.stockQuantity
+    Number(product.stockQuantity) || 0
   );
 
-  const totalPrice = product.price * quantity;
+  const price =
+    Number(product.price) || 0;
+
+  const totalPrice =
+    price * quantity;
+
+  const isOutOfStock =
+    stock <= 0;
 
   const increaseQuantity = () => {
     setQuantity((current) => {
@@ -37,46 +44,90 @@ export default function ProductDetailActions({
     );
   };
 
-  const isOutOfStock = stock <= 0;
-
   return (
-    <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-white shadow-soft">
-      {/* Header */}
-      <div className="border-b border-border bg-surface-muted px-4 py-3.5">
+    <div
+      className="
+        mt-5
+        overflow-hidden
+        rounded-2xl
+        border border-slate-200
+        bg-white
+        shadow-sm
+      "
+    >
+      {/* =================================================
+          QUANTITY HEADER
+      ================================================= */}
+
+      <div className="border-b border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
         <div className="flex items-center justify-between gap-4">
+
           <div>
-            <p className="text-sm font-black text-text-primary">
+            <p className="text-sm font-black text-slate-900">
               Quantity
             </p>
 
             {stock > 0 ? (
-              <p className="mt-0.5 text-xs font-medium text-text-muted">
-                {stock} available
+              <p className="mt-0.5 text-xs font-medium text-slate-500">
+                {stock}{" "}
+                {stock === 1
+                  ? "item"
+                  : "items"}{" "}
+                available
               </p>
             ) : (
-              <p className="mt-0.5 text-xs font-semibold text-danger">
+              <p className="mt-0.5 text-xs font-bold text-red-600">
                 Currently unavailable
               </p>
             )}
           </div>
 
           {/* Quantity Selector */}
-          <div className="flex items-center overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+
+          <div
+            className="
+              flex
+              items-center
+              overflow-hidden
+              rounded-xl
+              border border-slate-200
+              bg-white
+              shadow-sm
+            "
+          >
             <button
               type="button"
               onClick={decreaseQuantity}
               disabled={
-                quantity <= 1 || isOutOfStock
+                quantity <= 1 ||
+                isOutOfStock
               }
               aria-label="Decrease quantity"
-              className="flex h-10 w-10 items-center justify-center text-xl font-bold text-text-primary transition hover:bg-brand-soft-gold disabled:cursor-not-allowed disabled:opacity-30"
+              className="
+                flex h-10 w-10
+                items-center justify-center
+                text-xl font-bold
+                text-slate-700
+                transition
+                hover:bg-rose-50
+                hover:text-[#f43f5e]
+                disabled:cursor-not-allowed
+                disabled:opacity-30
+              "
             >
               −
             </button>
 
             <span
               aria-live="polite"
-              className="flex h-10 min-w-12 items-center justify-center border-x border-border px-3 text-sm font-black text-text-primary"
+              className="
+                flex h-10 min-w-12
+                items-center justify-center
+                border-x border-slate-200
+                px-3
+                text-sm font-black
+                text-[#172554]
+              "
             >
               {quantity}
             </span>
@@ -85,63 +136,148 @@ export default function ProductDetailActions({
               type="button"
               onClick={increaseQuantity}
               disabled={
-                quantity >= stock || isOutOfStock
+                quantity >= stock ||
+                isOutOfStock
               }
               aria-label="Increase quantity"
-              className="flex h-10 w-10 items-center justify-center text-xl font-bold text-text-primary transition hover:bg-brand-soft-gold disabled:cursor-not-allowed disabled:opacity-30"
+              className="
+                flex h-10 w-10
+                items-center justify-center
+                text-xl font-bold
+                text-slate-700
+                transition
+                hover:bg-rose-50
+                hover:text-[#f43f5e]
+                disabled:cursor-not-allowed
+                disabled:opacity-30
+              "
             >
               +
             </button>
           </div>
+
         </div>
       </div>
 
-      <div className="p-4">
-        {/* Total */}
+      <div className="p-4 sm:p-5">
+
+        {/* =================================================
+            PRICE SUMMARY
+        ================================================= */}
+
         {!isOutOfStock && (
-          <div className="flex items-center justify-between rounded-xl border border-brand-gold/30 bg-brand-soft-gold px-4 py-3">
-            <div>
-              <p className="text-xs font-semibold text-text-secondary">
-                Total for {quantity}{" "}
-                {quantity === 1 ? "item" : "items"}
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-4
+              rounded-xl
+              border border-rose-100
+              bg-rose-50/60
+              px-4 py-3.5
+            "
+          >
+            <div className="min-w-0">
+
+              <p className="text-xs font-bold text-slate-600">
+                {quantity}{" "}
+                {quantity === 1
+                  ? "item"
+                  : "items"}{" "}
+                total
               </p>
 
-              <p className="mt-0.5 text-[10px] text-text-muted">
+              <p className="mt-0.5 text-[10px] font-medium text-slate-400">
                 ₹
-                {Number(product.price).toLocaleString(
+                {price.toLocaleString(
                   "en-IN"
                 )}{" "}
-                each
+                per item
               </p>
+
             </div>
 
-            <span className="text-xl font-black text-brand-coral">
+            <span
+              className="
+                shrink-0
+                text-xl
+                font-black
+                tracking-tight
+                text-[#172554]
+                sm:text-2xl
+              "
+            >
               ₹
-              {totalPrice.toLocaleString("en-IN")}
+              {totalPrice.toLocaleString(
+                "en-IN"
+              )}
             </span>
+
           </div>
         )}
 
-        {/* Stock Warning */}
-        {!isOutOfStock && stock <= 5 && (
-          <div className="mt-3 flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5">
-            <span aria-hidden="true">🔥</span>
+        {/* =================================================
+            LOW STOCK WARNING
+        ================================================= */}
 
-            <p className="text-xs font-bold text-warning">
-              Only {stock} left in stock
-            </p>
-          </div>
-        )}
+        {!isOutOfStock &&
+          stock <= 5 && (
+            <div
+              className="
+                mt-3
+                flex
+                items-center
+                gap-2
+                rounded-xl
+                border border-orange-100
+                bg-orange-50
+                px-3 py-2.5
+              "
+            >
+              <span
+                className="text-sm"
+                aria-hidden="true"
+              >
+                🔥
+              </span>
 
-        {/* Add To Cart */}
+              <p className="text-xs font-bold text-orange-700">
+                Only {stock}{" "}
+                {stock === 1
+                  ? "item"
+                  : "items"}{" "}
+                left in stock
+              </p>
+            </div>
+          )}
+
+        {/* =================================================
+            ADD TO CART
+        ================================================= */}
+
         <div className="mt-4">
           {isOutOfStock ? (
             <button
               type="button"
               disabled
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-muted px-4 py-3.5 text-sm font-extrabold text-text-muted"
+              className="
+                flex w-full
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                border border-slate-200
+                bg-slate-100
+                px-4 py-3.5
+                text-sm font-extrabold
+                text-slate-400
+              "
             >
-              <span aria-hidden="true">×</span>
+              <span aria-hidden="true">
+                ×
+              </span>
+
               Out of Stock
             </button>
           ) : (
@@ -152,52 +288,92 @@ export default function ProductDetailActions({
           )}
         </div>
 
-        {/* Delivery Information */}
+        {/* =================================================
+            SHOPPING BENEFITS
+        ================================================= */}
+
         {!isOutOfStock && (
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-xl border border-border bg-surface-muted px-3 py-3">
+
+            <div
+              className="
+                rounded-xl
+                border border-slate-200
+                bg-slate-50
+                px-3 py-3
+              "
+            >
               <div className="flex items-center gap-2">
+
                 <span
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-sm shadow-sm"
+                  className="
+                    flex h-8 w-8
+                    shrink-0
+                    items-center justify-center
+                    rounded-lg
+                    bg-white
+                    text-sm
+                    shadow-sm
+                  "
                   aria-hidden="true"
                 >
                   🚚
                 </span>
 
                 <div>
-                  <p className="text-xs font-extrabold text-text-primary">
+                  <p className="text-xs font-extrabold text-slate-800">
                     Delivery
                   </p>
 
-                  <p className="mt-0.5 text-[10px] font-medium text-text-muted">
-                    Available
+                  <p className="mt-0.5 text-[10px] font-medium text-slate-500">
+                    PAN India
                   </p>
                 </div>
+
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface-muted px-3 py-3">
+            <div
+              className="
+                rounded-xl
+                border border-slate-200
+                bg-slate-50
+                px-3 py-3
+              "
+            >
               <div className="flex items-center gap-2">
+
                 <span
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-sm shadow-sm"
+                  className="
+                    flex h-8 w-8
+                    shrink-0
+                    items-center justify-center
+                    rounded-lg
+                    bg-white
+                    text-sm
+                    shadow-sm
+                  "
                   aria-hidden="true"
                 >
                   🔒
                 </span>
 
                 <div>
-                  <p className="text-xs font-extrabold text-text-primary">
+                  <p className="text-xs font-extrabold text-slate-800">
                     Secure
                   </p>
 
-                  <p className="mt-0.5 text-[10px] font-medium text-text-muted">
+                  <p className="mt-0.5 text-[10px] font-medium text-slate-500">
                     Safe checkout
                   </p>
                 </div>
+
               </div>
             </div>
+
           </div>
         )}
+
       </div>
     </div>
   );

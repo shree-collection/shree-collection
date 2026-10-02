@@ -10,54 +10,55 @@ type ProductCardProps = {
 export default function ProductCard({
   product,
 }: ProductCardProps) {
+  const stockQuantity =
+    Number(product.stockQuantity) || 0;
+
   const isOutOfStock =
-    product.stockQuantity <= 0;
+    stockQuantity <= 0;
 
   const isLowStock =
     !isOutOfStock &&
-    product.stockQuantity <= 5;
+    stockQuantity <= 5;
+
+  const price =
+    Number(product.price) || 0;
+
+  const oldPrice =
+    product.oldPrice !== undefined &&
+    product.oldPrice !== null
+      ? Number(product.oldPrice)
+      : 0;
 
   const hasDiscount =
-    Boolean(product.discount) &&
-    Boolean(product.oldPrice) &&
-    Number(product.oldPrice) >
-      Number(product.price);
+    oldPrice > price;
 
-  /*
-   * Extract numeric discount percentage if the
-   * existing discount value contains a number.
-   *
-   * Example:
-   * "20% OFF" -> 20
-   */
-  const discountPercentage = product.discount
-    ? Number(
-        String(product.discount).replace(
-          /[^0-9.]/g,
-          ""
+  const discountPercentage =
+    hasDiscount
+      ? Math.round(
+          ((oldPrice - price) /
+            oldPrice) *
+            100
         )
-      )
-    : 0;
+      : 0;
 
   return (
     <article
       className="
         group flex min-w-0 flex-col
         overflow-hidden
-        rounded-xl
+        rounded-2xl
         border border-slate-200
         bg-white
-        shadow-sm
-        transition
+        transition-all
         duration-200
         hover:-translate-y-0.5
         hover:border-slate-300
-        hover:shadow-md
+        hover:shadow-lg
       "
     >
-      {/* =====================================================
+      {/* =================================================
           PRODUCT IMAGE
-          ===================================================== */}
+      ================================================= */}
 
       <Link
         href={`/products/${product.slug}`}
@@ -69,25 +70,24 @@ export default function ProductCard({
         "
         aria-label={`View ${product.name}`}
       >
-        {/* Discount */}
+        {/* Discount Badge */}
 
-        {hasDiscount && product.discount && (
+        {hasDiscount && (
           <span
             className="
-              absolute left-2 top-2 z-10
+              absolute left-2.5 top-2.5 z-10
               rounded-md
-              bg-brand-coral
-              px-1.5 py-1
+              bg-[#f43f5e]
+              px-2 py-1
               text-[9px]
-              font-extrabold
+              font-black
+              tracking-wide
               text-white
               shadow-sm
-              sm:left-2.5
-              sm:top-2.5
-              sm:px-2
+              sm:text-[10px]
             "
           >
-            {product.discount}
+            {discountPercentage}% OFF
           </span>
         )}
 
@@ -95,33 +95,30 @@ export default function ProductCard({
 
         <span
           className="
-            absolute right-2 top-2 z-10
-            flex h-7 w-7
+            absolute right-2.5 top-2.5 z-10
+            flex h-8 w-8
             items-center justify-center
             rounded-full
-            bg-white/95
+            bg-white
             text-base
             text-slate-500
             shadow-sm
-            backdrop-blur-sm
             transition
-            group-hover:text-brand-coral
-            sm:right-2.5
-            sm:top-2.5
+            group-hover:text-[#f43f5e]
           "
           aria-hidden="true"
         >
           ♡
         </span>
 
-        {/* Out of stock */}
+        {/* Out of Stock */}
 
         {isOutOfStock && (
           <div
             className="
               absolute inset-0 z-20
               flex items-center justify-center
-              bg-black/25
+              bg-slate-900/20
             "
           >
             <span
@@ -130,7 +127,7 @@ export default function ProductCard({
                 bg-white
                 px-3 py-1.5
                 text-[10px]
-                font-extrabold
+                font-black
                 text-slate-800
                 shadow-lg
               "
@@ -140,7 +137,7 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Product image */}
+        {/* Product Image */}
 
         {product.image ? (
           <img
@@ -148,13 +145,14 @@ export default function ProductCard({
             alt={product.name}
             loading="lazy"
             className={`
-              h-full w-full
+              h-full
+              w-full
               object-contain
-              p-2.5
-              transition
+              p-3
+              transition-transform
               duration-300
-              group-hover:scale-105
-              sm:p-3
+              group-hover:scale-[1.04]
+              sm:p-4
               ${
                 isOutOfStock
                   ? "opacity-60 grayscale-[20%]"
@@ -163,14 +161,19 @@ export default function ProductCard({
             `}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
+          <div
+            className="
+              flex h-full w-full
+              items-center justify-center
+            "
+          >
             <div
               className="
-                flex h-14 w-14
+                flex h-16 w-16
                 items-center justify-center
-                rounded-xl
+                rounded-2xl
                 bg-white
-                text-2xl
+                text-3xl
                 shadow-sm
               "
             >
@@ -179,38 +182,39 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Bottom image gradient */}
+        {/* Image Hover Overlay */}
 
-        <div
-          className="
-            pointer-events-none
-            absolute inset-x-0 bottom-0
-            h-12
-            bg-gradient-to-t
-            from-black/5
-            to-transparent
-            opacity-0
-            transition-opacity
-            duration-300
-            group-hover:opacity-100
-          "
-          aria-hidden="true"
-        />
+        {!isOutOfStock && (
+          <div
+            className="
+              pointer-events-none
+              absolute inset-x-0 bottom-0
+              h-16
+              bg-gradient-to-t
+              from-black/10
+              to-transparent
+              opacity-0
+              transition-opacity
+              duration-200
+              group-hover:opacity-100
+            "
+          />
+        )}
       </Link>
 
-      {/* =====================================================
+      {/* =================================================
           PRODUCT INFORMATION
-          ===================================================== */}
+      ================================================= */}
 
       <div
         className="
           flex flex-1
           flex-col
-          p-2.5
-          sm:p-3
+          p-3
+          sm:p-3.5
         "
       >
-        {/* Product name */}
+        {/* Product Name */}
 
         <Link
           href={`/products/${product.slug}`}
@@ -219,13 +223,13 @@ export default function ProductCard({
           <h3
             className="
               line-clamp-2
-              min-h-[36px]
+              min-h-[38px]
               text-[12px]
               font-bold
               leading-[18px]
               text-slate-800
               transition-colors
-              hover:text-brand-coral
+              group-hover:text-[#f43f5e]
               sm:text-sm
               sm:leading-5
             "
@@ -251,135 +255,106 @@ export default function ProductCard({
         )}
 
         {/* =================================================
-            RATING AREA
-            ================================================= */}
-
-        <div className="mt-1.5 flex items-center gap-1.5">
-          <span
-            className="
-              inline-flex
-              items-center gap-0.5
-              rounded
-              bg-green-600
-              px-1.5 py-0.5
-              text-[9px]
-              font-bold
-              text-white
-            "
-          >
-            <span>★</span>
-            <span>4.5</span>
-          </span>
-
-          <span className="text-[9px] text-slate-400">
-            Product
-          </span>
-        </div>
-
-        {/* =================================================
             PRICE
-            ================================================= */}
+        ================================================= */}
 
-        <div className="mt-2 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+        <div
+          className="
+            mt-2.5
+            flex flex-wrap
+            items-baseline
+            gap-x-2
+            gap-y-0.5
+          "
+        >
           <span
             className="
-              text-base
+              text-lg
               font-black
               tracking-tight
-              text-brand-navy
-              sm:text-lg
+              text-[#172554]
+              sm:text-xl
             "
           >
-            ₹
-            {Number(
-              product.price
-            ).toLocaleString("en-IN")}
+            ₹{price.toLocaleString("en-IN")}
           </span>
 
-          {hasDiscount &&
-            product.oldPrice &&
-            Number(product.oldPrice) >
-              Number(product.price) && (
-              <span
-                className="
-                  text-[10px]
-                  font-medium
-                  text-slate-400
-                  line-through
-                  sm:text-xs
-                "
-              >
-                ₹
-                {Number(
-                  product.oldPrice
-                ).toLocaleString("en-IN")}
-              </span>
-            )}
-        </div>
-
-        {/* Discount percentage */}
-
-        {hasDiscount &&
-          discountPercentage > 0 && (
-            <p
+          {hasDiscount && (
+            <span
               className="
-                mt-0.5
-                text-[9px]
-                font-bold
-                text-green-600
+                text-[10px]
+                font-medium
+                text-slate-400
+                line-through
+                sm:text-xs
               "
             >
-              {Math.round(
-                discountPercentage
-              )}
-              % off
-            </p>
+              ₹{oldPrice.toLocaleString("en-IN")}
+            </span>
           )}
+        </div>
 
-        {/* =================================================
-            STOCK STATUS
-            ================================================= */}
+        {/* Savings */}
 
-        {isOutOfStock ? (
+        {hasDiscount && (
           <p
             className="
-              mt-1.5
-              text-[9px]
-              font-bold
-              text-red-600
-            "
-          >
-            ● Currently unavailable
-          </p>
-        ) : isLowStock ? (
-          <p
-            className="
-              mt-1.5
-              text-[9px]
-              font-bold
-              text-amber-600
-            "
-          >
-            ● Only {product.stockQuantity} left
-          </p>
-        ) : (
-          <p
-            className="
-              mt-1.5
+              mt-0.5
               text-[9px]
               font-bold
               text-green-600
             "
           >
-            ● In stock
+            Save ₹
+            {(
+              oldPrice - price
+            ).toLocaleString("en-IN")}
           </p>
         )}
 
         {/* =================================================
-            ADD TO CART
-            ================================================= */}
+            STOCK STATUS
+        ================================================= */}
 
-        <div className="mt-2.5">
+        <div className="mt-2 min-h-[16px]">
+          {isOutOfStock ? (
+            <p
+              className="
+                text-[9px]
+                font-bold
+                text-red-600
+              "
+            >
+              Currently unavailable
+            </p>
+          ) : isLowStock ? (
+            <p
+              className="
+                text-[9px]
+                font-bold
+                text-orange-600
+              "
+            >
+              Only {stockQuantity} left
+            </p>
+          ) : (
+            <p
+              className="
+                text-[9px]
+                font-semibold
+                text-green-600
+              "
+            >
+              In stock
+            </p>
+          )}
+        </div>
+
+        {/* =================================================
+            ADD TO CART
+        ================================================= */}
+
+        <div className="mt-3">
           <AddToCartButton
             product={product}
           />

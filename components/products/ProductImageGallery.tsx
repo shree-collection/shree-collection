@@ -13,9 +13,9 @@ export default function ProductImageGallery({
   images,
   discount = 0,
 }: ProductImageGalleryProps) {
-  /* --------------------------------
-     Prepare unique images
-  -------------------------------- */
+  /* ======================================================
+     PREPARE UNIQUE IMAGES
+  ====================================================== */
 
   const uniqueImages = useMemo(() => {
     return [
@@ -28,9 +28,9 @@ export default function ProductImageGallery({
     ];
   }, [images]);
 
-  /* --------------------------------
-     Selected image
-  -------------------------------- */
+  /* ======================================================
+     SELECTED IMAGE
+  ====================================================== */
 
   const [selectedImage, setSelectedImage] =
     useState(uniqueImages[0] || "");
@@ -38,10 +38,9 @@ export default function ProductImageGallery({
   const [isZoomOpen, setIsZoomOpen] =
     useState(false);
 
-  /* --------------------------------
-     Keep selected image valid
-     when product/images change
-  -------------------------------- */
+  /* ======================================================
+     KEEP SELECTED IMAGE VALID
+  ====================================================== */
 
   useEffect(() => {
     if (
@@ -56,16 +55,16 @@ export default function ProductImageGallery({
     }
   }, [uniqueImages, selectedImage]);
 
-  /* --------------------------------
-     Selected image index
-  -------------------------------- */
+  /* ======================================================
+     SELECTED IMAGE INDEX
+  ====================================================== */
 
   const selectedIndex =
     uniqueImages.indexOf(selectedImage);
 
-  /* --------------------------------
-     Previous image
-  -------------------------------- */
+  /* ======================================================
+     PREVIOUS IMAGE
+  ====================================================== */
 
   const goToPrevious = () => {
     if (uniqueImages.length <= 1) {
@@ -82,9 +81,9 @@ export default function ProductImageGallery({
     );
   };
 
-  /* --------------------------------
-     Next image
-  -------------------------------- */
+  /* ======================================================
+     NEXT IMAGE
+  ====================================================== */
 
   const goToNext = () => {
     if (uniqueImages.length <= 1) {
@@ -102,9 +101,9 @@ export default function ProductImageGallery({
     );
   };
 
-  /* --------------------------------
-     Keyboard navigation
-  -------------------------------- */
+  /* ======================================================
+     KEYBOARD NAVIGATION
+  ====================================================== */
 
   useEffect(() => {
     if (!isZoomOpen) {
@@ -150,20 +149,20 @@ export default function ProductImageGallery({
     uniqueImages,
   ]);
 
-  /* --------------------------------
-     No images
-  -------------------------------- */
+  /* ======================================================
+     NO IMAGES
+  ====================================================== */
 
   if (uniqueImages.length === 0) {
     return (
-      <div className="overflow-hidden rounded-3xl border border-border bg-brand-soft-gold shadow-soft">
-        <div className="relative flex h-[300px] items-center justify-center sm:h-[520px]">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+        <div className="flex h-[320px] items-center justify-center sm:h-[500px]">
           <div className="text-center">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white text-5xl shadow-soft">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white text-4xl shadow-sm">
               🎁
             </div>
 
-            <p className="mt-4 text-sm font-semibold text-text-muted">
+            <p className="mt-4 text-sm font-semibold text-slate-500">
               No product image available
             </p>
           </div>
@@ -174,75 +173,196 @@ export default function ProductImageGallery({
 
   return (
     <>
+      {/* =================================================
+          GALLERY
+      ================================================= */}
+
       <div className="w-full">
-        {/* Main Image */}
+
+        {/* =================================================
+            MAIN IMAGE
+        ================================================= */}
+
         <button
           type="button"
-          onClick={() => setIsZoomOpen(true)}
-          className="group relative flex h-[300px] w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-3xl border border-border bg-brand-soft-gold shadow-soft transition hover:shadow-card sm:h-[520px]"
+          onClick={() =>
+            setIsZoomOpen(true)
+          }
+          className="
+            group
+            relative
+            flex
+            h-[320px]
+            w-full
+            cursor-zoom-in
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-2xl
+            border
+            border-slate-200
+            bg-white
+            transition
+            hover:border-slate-300
+            hover:shadow-md
+            sm:h-[500px]
+          "
           aria-label={`View ${productName} image`}
         >
-          {/* Decorative Background */}
+          {/* Subtle background */}
+
           <div
-            className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-brand-gold/15 transition-transform duration-500 group-hover:scale-125"
+            className="
+              pointer-events-none
+              absolute
+              inset-0
+              bg-gradient-to-br
+              from-slate-50
+              via-white
+              to-slate-50
+            "
             aria-hidden="true"
           />
 
-          <div
-            className="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-brand-coral/5"
-            aria-hidden="true"
-          />
+          {/* Product image */}
 
-          {/* Product Image */}
           <img
             src={selectedImage}
             alt={productName}
-            className="relative z-[1] h-full w-full object-contain p-5 transition-transform duration-500 group-hover:scale-105 sm:p-8"
+            className="
+              relative
+              z-[1]
+              h-full
+              w-full
+              object-contain
+              p-6
+              transition-transform
+              duration-500
+              group-hover:scale-[1.035]
+              sm:p-10
+            "
           />
 
           {/* Discount */}
+
           {discount > 0 && (
-            <span className="absolute left-4 top-4 z-10 rounded-full bg-brand-coral px-3.5 py-1.5 text-xs font-black text-white shadow-sm">
+            <span
+              className="
+                absolute
+                left-4
+                top-4
+                z-10
+                rounded-lg
+                bg-[#f43f5e]
+                px-3
+                py-1.5
+                text-[10px]
+                font-black
+                text-white
+                shadow-sm
+                sm:text-xs
+              "
+            >
               {discount}% OFF
             </span>
           )}
 
-          {/* Image Count */}
+          {/* Image counter */}
+
           {uniqueImages.length > 1 && (
-            <span className="absolute right-4 top-4 z-10 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-extrabold text-brand-navy shadow-sm backdrop-blur">
+            <span
+              className="
+                absolute
+                right-4
+                top-4
+                z-10
+                rounded-lg
+                bg-white/95
+                px-3
+                py-1.5
+                text-[10px]
+                font-extrabold
+                text-[#172554]
+                shadow-sm
+                backdrop-blur
+              "
+            >
               {selectedIndex + 1} /{" "}
               {uniqueImages.length}
             </span>
           )}
 
-          {/* Zoom Hint */}
-          <span className="absolute bottom-4 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-1.5 rounded-full bg-white/90 px-4 py-2 text-xs font-bold text-text-primary shadow-sm backdrop-blur sm:flex">
-            <span aria-hidden="true">🔍</span>
+          {/* Zoom hint */}
+
+          <span
+            className="
+              absolute
+              bottom-4
+              left-1/2
+              z-10
+              hidden
+              -translate-x-1/2
+              items-center
+              gap-1.5
+              rounded-full
+              bg-white/95
+              px-4
+              py-2
+              text-xs
+              font-bold
+              text-slate-700
+              shadow-sm
+              backdrop-blur
+              sm:flex
+            "
+          >
+            <span aria-hidden="true">
+              🔍
+            </span>
             Click to enlarge
           </span>
 
-          {/* Hover Overlay */}
+          {/* Hover overlay */}
+
           <span
-            className="pointer-events-none absolute inset-0 z-[2] bg-black/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            className="
+              pointer-events-none
+              absolute
+              inset-0
+              z-[2]
+              bg-black/5
+              opacity-0
+              transition-opacity
+              duration-300
+              group-hover:opacity-100
+            "
             aria-hidden="true"
           />
         </button>
 
-        {/* Thumbnails */}
+        {/* =================================================
+            THUMBNAILS
+        ================================================= */}
+
         {uniqueImages.length > 1 && (
-          <div className="mt-4">
-            <div className="no-scrollbar flex gap-2.5 overflow-x-auto pb-2 sm:gap-3">
+          <div className="mt-3">
+
+            <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1 sm:gap-2.5">
+
               {uniqueImages.map(
                 (image, index) => {
                   const isSelected =
-                    image === selectedImage;
+                    image ===
+                    selectedImage;
 
                   return (
                     <button
                       key={`${image}-${index}`}
                       type="button"
                       onClick={() =>
-                        setSelectedImage(image)
+                        setSelectedImage(
+                          image
+                        )
                       }
                       aria-label={`View ${productName} image ${
                         index + 1
@@ -252,26 +372,65 @@ export default function ProductImageGallery({
                           ? "true"
                           : undefined
                       }
-                      className={`group/thumb relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition duration-200 sm:h-24 sm:w-24 ${
-                        isSelected
-                          ? "border-brand-coral shadow-card"
-                          : "border-border hover:border-brand-gold hover:shadow-soft"
-                      }`}
+                      className={`
+                        group/thumb
+                        relative
+                        h-[68px]
+                        w-[68px]
+                        shrink-0
+                        overflow-hidden
+                        rounded-xl
+                        border-2
+                        bg-white
+                        transition
+                        duration-200
+                        sm:h-20
+                        sm:w-20
+                        ${
+                          isSelected
+                            ? "border-[#f43f5e] shadow-sm"
+                            : "border-slate-200 hover:border-slate-400"
+                        }
+                      `}
                     >
                       <img
                         src={image}
                         alt={`${productName} image ${
                           index + 1
                         }`}
-                        className={`h-full w-full object-contain p-1.5 transition duration-300 group-hover/thumb:scale-105 ${
-                          isSelected
-                            ? ""
-                            : "opacity-75 group-hover/thumb:opacity-100"
-                        }`}
+                        className={`
+                          h-full
+                          w-full
+                          object-contain
+                          p-1.5
+                          transition
+                          duration-300
+                          group-hover/thumb:scale-105
+                          ${
+                            isSelected
+                              ? ""
+                              : "opacity-70 group-hover/thumb:opacity-100"
+                          }
+                        `}
                       />
 
                       {isSelected && (
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-brand-coral px-2 py-0.5 text-[8px] font-black text-white shadow-sm">
+                        <span
+                          className="
+                            absolute
+                            bottom-1
+                            left-1/2
+                            -translate-x-1/2
+                            rounded-full
+                            bg-[#f43f5e]
+                            px-2
+                            py-0.5
+                            text-[7px]
+                            font-black
+                            text-white
+                            shadow-sm
+                          "
+                        >
                           Selected
                         </span>
                       )}
@@ -279,36 +438,77 @@ export default function ProductImageGallery({
                   );
                 }
               )}
+
             </div>
 
-            <p className="mt-1.5 text-center text-[11px] font-semibold text-text-muted">
+            <p className="mt-2 text-center text-[10px] font-medium text-slate-400">
               Image {selectedIndex + 1} of{" "}
               {uniqueImages.length}
             </p>
+
           </div>
         )}
       </div>
 
-      {/* Image Lightbox */}
+      {/* =================================================
+          IMAGE LIGHTBOX
+      ================================================= */}
+
       {isZoomOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+          className="
+            fixed
+            inset-0
+            z-[100]
+            flex
+            items-center
+            justify-center
+            bg-black/90
+            p-4
+            backdrop-blur-sm
+          "
           role="dialog"
           aria-modal="true"
           aria-label={`${productName} image viewer`}
-          onClick={() => setIsZoomOpen(false)}
+          onClick={() =>
+            setIsZoomOpen(false)
+          }
         >
           {/* Close */}
+
           <button
             type="button"
-            onClick={() => setIsZoomOpen(false)}
-            className="absolute right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl font-bold text-text-primary shadow-lg transition hover:bg-surface-muted sm:right-6 sm:top-6"
+            onClick={() =>
+              setIsZoomOpen(false)
+            }
+            className="
+              absolute
+              right-4
+              top-4
+              z-30
+              flex
+              h-11
+              w-11
+              items-center
+              justify-center
+              rounded-full
+              bg-white
+              text-2xl
+              font-bold
+              text-slate-800
+              shadow-lg
+              transition
+              hover:bg-slate-100
+              sm:right-6
+              sm:top-6
+            "
             aria-label="Close image viewer"
           >
             ×
           </button>
 
           {/* Previous */}
+
           {uniqueImages.length > 1 && (
             <button
               type="button"
@@ -316,7 +516,27 @@ export default function ProductImageGallery({
                 event.stopPropagation();
                 goToPrevious();
               }}
-              className="absolute left-3 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-white text-3xl font-light text-text-primary shadow-lg transition hover:bg-surface-muted sm:left-6 sm:h-12 sm:w-12"
+              className="
+                absolute
+                left-3
+                z-30
+                flex
+                h-11
+                w-11
+                items-center
+                justify-center
+                rounded-full
+                bg-white
+                text-3xl
+                font-light
+                text-slate-800
+                shadow-lg
+                transition
+                hover:bg-slate-100
+                sm:left-6
+                sm:h-12
+                sm:w-12
+              "
               aria-label="Previous image"
             >
               ‹
@@ -324,8 +544,15 @@ export default function ProductImageGallery({
           )}
 
           {/* Large Image */}
+
           <div
-            className="flex max-h-[90vh] max-w-[90vw] items-center justify-center"
+            className="
+              flex
+              max-h-[90vh]
+              max-w-[90vw]
+              items-center
+              justify-center
+            "
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -333,11 +560,16 @@ export default function ProductImageGallery({
             <img
               src={selectedImage}
               alt={productName}
-              className="max-h-[85vh] max-w-[85vw] object-contain"
+              className="
+                max-h-[85vh]
+                max-w-[85vw]
+                object-contain
+              "
             />
           </div>
 
           {/* Next */}
+
           {uniqueImages.length > 1 && (
             <button
               type="button"
@@ -345,7 +577,27 @@ export default function ProductImageGallery({
                 event.stopPropagation();
                 goToNext();
               }}
-              className="absolute right-3 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-white text-3xl font-light text-text-primary shadow-lg transition hover:bg-surface-muted sm:right-6 sm:h-12 sm:w-12"
+              className="
+                absolute
+                right-3
+                z-30
+                flex
+                h-11
+                w-11
+                items-center
+                justify-center
+                rounded-full
+                bg-white
+                text-3xl
+                font-light
+                text-slate-800
+                shadow-lg
+                transition
+                hover:bg-slate-100
+                sm:right-6
+                sm:h-12
+                sm:w-12
+              "
               aria-label="Next image"
             >
               ›
@@ -353,8 +605,24 @@ export default function ProductImageGallery({
           )}
 
           {/* Image Counter */}
+
           {uniqueImages.length > 1 && (
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-4 py-2 text-sm font-bold text-white backdrop-blur">
+            <div
+              className="
+                absolute
+                bottom-5
+                left-1/2
+                -translate-x-1/2
+                rounded-full
+                bg-black/70
+                px-4
+                py-2
+                text-sm
+                font-bold
+                text-white
+                backdrop-blur
+              "
+            >
               {selectedIndex + 1} /{" "}
               {uniqueImages.length}
             </div>

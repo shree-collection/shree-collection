@@ -41,38 +41,68 @@ export async function GET(
 
     /* ---------------------------------------------
        Get retail order
-       Mobile number must match the order.
     --------------------------------------------- */
 
-    const { data: order, error: orderError } =
-      await supabase
-        .from("orders")
-        .select(`
-          id,
-          order_number,
-          order_type,
-          status,
-          payment_status,
-          payment_method,
-          subtotal,
-          shipping_amount,
-          discount_amount,
-          total_amount,
-          shipping_name,
-          shipping_phone,
-          shipping_address,
-          shipping_city,
-          shipping_state,
-          shipping_pincode,
-          created_at,
-          updated_at
-        `)
-        .eq("id", id)
-        .eq("order_type", "retail")
-        .eq("shipping_phone", mobile)
-        .single();
+    const {
+      data: order,
+      error: orderError,
+    } = await supabase
+      .from("orders")
+      .select(`
+        id,
+        order_number,
+        order_type,
+        status,
+        payment_status,
+        payment_method,
+        subtotal,
+        shipping_amount,
+        discount_amount,
+        total_amount,
+        shipping_name,
+        shipping_phone,
+        shipping_address,
+        shipping_city,
+        shipping_state,
+        shipping_pincode,
+        created_at,
+        updated_at
+      `)
+      .eq("id", id)
+      .eq("order_type", "retail")
+      .single();
 
     if (orderError || !order) {
+      return NextResponse.json(
+        {
+          error: "Order not found.",
+        },
+        { status: 404 }
+      );
+    }
+
+    /* ---------------------------------------------
+       Verify mobile number
+
+       Compare the last 10 digits so these formats
+       all work:
+
+       9876543210
+       919876543210
+       +919876543210
+       +91 9876543210
+    --------------------------------------------- */
+
+    const storedMobile = String(
+      order.shipping_phone || ""
+    ).replace(/\D/g, "");
+
+    const normalizedStoredMobile =
+      storedMobile.length >= 10
+        ? storedMobile.slice(-10)
+        : storedMobile;
+
+    if (normalizedStoredMobile !== mobile) {
       return NextResponse.json(
         {
           error:
@@ -86,24 +116,26 @@ export async function GET(
        Get order items
     --------------------------------------------- */
 
-    const { data: items, error: itemsError } =
-      await supabase
-        .from("order_items")
-        .select(`
-          id,
-          order_id,
-          product_id,
-          product_name,
-          sku,
-          quantity,
-          unit_price,
-          total_price,
-          created_at
-        `)
-        .eq("order_id", id)
-        .order("created_at", {
-          ascending: true,
-        });
+    const {
+      data: items,
+      error: itemsError,
+    } = await supabase
+      .from("order_items")
+      .select(`
+        id,
+        order_id,
+        product_id,
+        product_name,
+        sku,
+        quantity,
+        unit_price,
+        total_price,
+        created_at
+      `)
+      .eq("order_id", id)
+      .order("created_at", {
+        ascending: true,
+      });
 
     if (itemsError) {
       console.error(
@@ -121,9 +153,6 @@ export async function GET(
 
     /* ---------------------------------------------
        Get original product images
-       
-       product_id is stored in order_items.
-       image_url is the primary product image.
     --------------------------------------------- */
 
     const productIds = [
@@ -190,15 +219,15 @@ export async function GET(
 
     /* ---------------------------------------------
        Attach image_url to order items
-       
-       Keep all existing order item fields.
     --------------------------------------------- */
 
     const itemsWithImages = (items || []).map(
       (item) => ({
         ...item,
         image_url: item.product_id
-          ? productImageMap.get(item.product_id) || null
+          ? productImageMap.get(
+              item.product_id
+            ) || null
           : null,
       })
     );

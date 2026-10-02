@@ -36,15 +36,15 @@ export default function TrackRecentlyViewed({
         }
       }
 
-      // Remove the current product if already present.
+      // Remove the current product if it already exists.
       ids = ids.filter(
         (id) => id !== productId
       );
 
-      // Put the current product first.
+      // Add the current product to the beginning.
       ids.unshift(productId);
 
-      // Keep only the latest products.
+      // Keep only the latest viewed products.
       ids = ids.slice(0, MAX_PRODUCTS);
 
       localStorage.setItem(

@@ -7,10 +7,17 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const orderNumber =
-      searchParams.get("order_number")?.trim().toUpperCase() || "";
+      searchParams
+        .get("order_number")
+        ?.trim()
+        .toUpperCase() || "";
 
     const mobile =
       searchParams.get("mobile")?.replace(/\D/g, "") || "";
+
+    /* ======================================================
+       Validate order number
+    ====================================================== */
 
     if (!orderNumber) {
       return NextResponse.json(
@@ -21,10 +28,15 @@ export async function GET(request: Request) {
       );
     }
 
+    /* ======================================================
+       Validate mobile number
+    ====================================================== */
+
     if (!/^\d{10}$/.test(mobile)) {
       return NextResponse.json(
         {
-          error: "Valid 10-digit mobile number is required.",
+          error:
+            "Valid 10-digit mobile number is required.",
         },
         { status: 400 }
       );
@@ -32,7 +44,14 @@ export async function GET(request: Request) {
 
     const supabase = await createClient();
 
-    const { data: order, error } = await supabase
+    /* ======================================================
+       Find retail order by order number
+    ====================================================== */
+
+    const {
+      data: order,
+      error,
+    } = await supabase
       .from("orders")
       .select(`
         id,
@@ -52,9 +71,12 @@ export async function GET(request: Request) {
         created_at
       `)
       .eq("order_number", orderNumber)
-      .eq("shipping_phone", mobile)
       .eq("order_type", "retail")
       .single();
+
+    /* ======================================================
+       Order not found
+    ====================================================== */
 
     if (error || !order) {
       return NextResponse.json(
@@ -65,6 +87,40 @@ export async function GET(request: Request) {
         { status: 404 }
       );
     }
+
+    /* ======================================================
+       Verify mobile number
+       
+       Compare the last 10 digits so these formats work:
+       
+       9876543210
+       919876543210
+       +919876543210
+       +91 9876543210
+    ====================================================== */
+
+    const storedMobile = String(
+      order.shipping_phone || ""
+    ).replace(/\D/g, "");
+
+    const normalizedStoredMobile =
+      storedMobile.length >= 10
+        ? storedMobile.slice(-10)
+        : storedMobile;
+
+    if (normalizedStoredMobile !== mobile) {
+      return NextResponse.json(
+        {
+          error:
+            "Order not found. Please check your order number and mobile number.",
+        },
+        { status: 404 }
+      );
+    }
+
+    /* ======================================================
+       Return order
+    ====================================================== */
 
     return NextResponse.json({
       order,

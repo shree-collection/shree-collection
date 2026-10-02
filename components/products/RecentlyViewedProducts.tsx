@@ -143,14 +143,6 @@ export default function RecentlyViewedProducts({
             ? data.products
             : [];
 
-        /*
-         * Build the recently viewed list
-         * explicitly instead of chaining find()
-         * directly into map().
-         *
-         * This guarantees that only a real
-         * ApiProduct reaches mapApiProduct().
-         */
         const recentProducts: Product[] = [];
 
         for (const id of ids) {
@@ -222,34 +214,63 @@ export default function RecentlyViewedProducts({
     products.slice(0, 4);
 
   return (
-    <section className="border-t border-border bg-surface-muted py-10 sm:py-14">
+    <section className="border-t border-slate-200 bg-slate-50 py-8 sm:py-10">
       <div className="container-shop">
+
         {/* Section Header */}
-        <div className="mb-6 flex items-end justify-between gap-4">
+
+        <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <span
-                className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft-gold text-sm shadow-sm"
+                className="
+                  flex
+                  h-8
+                  w-8
+                  items-center
+                  justify-center
+                  rounded-lg
+                  bg-white
+                  text-sm
+                  shadow-sm
+                  ring-1
+                  ring-slate-200
+                "
                 aria-hidden="true"
               >
                 👀
               </span>
 
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-coral">
-                Your Browsing History
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#f43f5e]">
+                Browsing History
               </p>
             </div>
 
-            <h2 className="mt-2 text-2xl font-black tracking-tight text-text-primary sm:text-3xl">
+            <h2 className="mt-2 text-xl font-black tracking-tight text-[#172554] sm:text-2xl">
               Recently Viewed
             </h2>
 
-            <p className="mt-1 text-sm text-text-muted">
+            <p className="mt-1 text-xs text-slate-500 sm:text-sm">
               Products you viewed recently
             </p>
           </div>
 
-          <span className="hidden shrink-0 rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-text-muted sm:inline-flex">
+          <span
+            className="
+              hidden
+              shrink-0
+              rounded-lg
+              border
+              border-slate-200
+              bg-white
+              px-3
+              py-1.5
+              text-[11px]
+              font-bold
+              text-slate-500
+              sm:inline-flex
+            "
+          >
             {visibleProducts.length}{" "}
             {visibleProducts.length === 1
               ? "item"
@@ -258,12 +279,24 @@ export default function RecentlyViewedProducts({
         </div>
 
         {/* Mobile Products */}
-        <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:hidden">
+
+        <div
+          className="
+            no-scrollbar
+            -mx-4
+            flex
+            gap-3
+            overflow-x-auto
+            px-4
+            pb-2
+            sm:hidden
+          "
+        >
           {visibleProducts.map(
             (product) => (
               <div
                 key={product.id}
-                className="w-[190px] shrink-0"
+                className="w-[180px] shrink-0"
               >
                 <ProductCard
                   product={product}
@@ -274,7 +307,18 @@ export default function RecentlyViewedProducts({
         </div>
 
         {/* Desktop Products */}
-        <div className="hidden grid-cols-2 gap-4 sm:grid md:grid-cols-3 lg:grid-cols-4 sm:gap-5">
+
+        <div
+          className="
+            hidden
+            grid-cols-2
+            gap-4
+            sm:grid
+            md:grid-cols-3
+            lg:grid-cols-4
+            sm:gap-5
+          "
+        >
           {visibleProducts.map(
             (product) => (
               <ProductCard

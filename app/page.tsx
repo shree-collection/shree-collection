@@ -21,7 +21,7 @@ type CategoryWithProducts = {
 
 /* =========================================================
    CATEGORY ICONS
-   ========================================================= */
+========================================================= */
 
 const categoryIcons: Record<string, string> = {
   "party-items": "🎉",
@@ -56,33 +56,30 @@ function getCategoryIcon(
 
 /* =========================================================
    HOME PAGE
-   Retail storefront
-   ========================================================= */
+========================================================= */
 
 export default async function Home() {
   const supabase = await createClient();
 
   /* =======================================================
      LOAD ACTIVE MAIN CATEGORIES
-     ======================================================= */
+  ======================================================= */
 
   const {
     data: categoryData,
     error: categoryError,
   } = await supabase
     .from("categories")
-    .select(
-      `
-        id,
-        name,
-        slug,
-        description,
-        image_url,
-        parent_id,
-        is_active,
-        sort_order
-      `
-    )
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      image_url,
+      parent_id,
+      is_active,
+      sort_order
+    `)
     .eq("is_active", true)
     .is("parent_id", null)
     .order("sort_order", {
@@ -104,81 +101,64 @@ export default async function Home() {
 
   /* =======================================================
      FIND CATEGORIES THAT HAVE PRODUCTS
-
-     Products can belong directly to a main category
-     or to one of its subcategories.
-     ======================================================= */
+  ======================================================= */
 
   const categoriesWithProducts: CategoryWithProducts[] =
     await Promise.all(
-      mainCategories.map(
-        async (category) => {
-          const {
-            data: subcategories,
-            error: subcategoryError,
-          } = await supabase
-            .from("categories")
-            .select("id")
-            .eq(
-              "parent_id",
-              category.id
-            )
-            .eq("is_active", true);
+      mainCategories.map(async (category) => {
+        const {
+          data: subcategories,
+          error: subcategoryError,
+        } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("parent_id", category.id)
+          .eq("is_active", true);
 
-          if (subcategoryError) {
-            console.error(
-              `Unable to load subcategories for ${category.name}:`,
-              subcategoryError
-            );
-          }
-
-          const categoryIds = [
-            category.id,
-            ...(subcategories || []).map(
-              (subcategory) =>
-                subcategory.id
-            ),
-          ];
-
-          const {
-            count,
-            error: productCountError,
-          } = await supabase
-            .from("products")
-            .select("id", {
-              count: "exact",
-              head: true,
-            })
-            .in(
-              "category_id",
-              categoryIds
-            )
-            .eq("is_active", true);
-
-          if (productCountError) {
-            console.error(
-              `Unable to count products for ${category.name}:`,
-              productCountError
-            );
-          }
-
-          return {
-            category,
-            productCount: count || 0,
-          };
+        if (subcategoryError) {
+          console.error(
+            `Unable to load subcategories for ${category.name}:`,
+            subcategoryError
+          );
         }
-      )
-    );
 
-  /* =======================================================
-     AVAILABLE CATEGORIES
-     ======================================================= */
+        const categoryIds = [
+          category.id,
+          ...(subcategories || []).map(
+            (subcategory) => subcategory.id
+          ),
+        ];
+
+        const {
+          count,
+          error: productCountError,
+        } = await supabase
+          .from("products")
+          .select("id", {
+            count: "exact",
+            head: true,
+          })
+          .in("category_id", categoryIds)
+          .eq("is_active", true);
+
+        if (productCountError) {
+          console.error(
+            `Unable to count products for ${category.name}:`,
+            productCountError
+          );
+        }
+
+        return {
+          category,
+          productCount: count || 0,
+        };
+      })
+    );
 
   const availableCategories =
     categoriesWithProducts
       .filter(
-        (item) =>
-          item.productCount > 0
+        (item) => item.productCount > 0
       )
       .sort((a, b) => {
         if (
@@ -198,467 +178,520 @@ export default async function Home() {
       });
 
   /*
-   * Only show the first few category product sections
-   * on the homepage.
-   *
-   * The complete catalogue remains available through
-   * /shop/products.
+   * Show a few category collections on the
+   * homepage. The complete catalogue remains
+   * available through /shop/products.
    */
   const featuredCategories =
-    availableCategories.slice(0, 4);
+    availableCategories.slice(0, 5);
+
+  const quickCategories =
+    availableCategories.slice(0, 8);
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-[#f8fafc]">
 
       {/* =================================================
-          RETAIL HERO
-          ================================================= */}
+          CATEGORY QUICK NAVIGATION
+      ================================================= */}
 
-      <section className="relative overflow-hidden bg-white">
-
-        {/* Decorative shapes */}
-
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-soft-gold" />
-
-        <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-brand-coral/5" />
-
-        <div className="absolute right-[12%] top-20 hidden text-5xl lg:block">
-          🎈
-        </div>
-
-        <div className="absolute left-[8%] top-32 hidden text-4xl lg:block">
-          🎁
-        </div>
-
-        <div className="container-shop relative px-4 py-12 sm:py-16 lg:py-20">
-
-          <div className="mx-auto max-w-4xl text-center">
-
-            {/* Small badge */}
-
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-xs font-extrabold text-brand-navy shadow-sm">
-              ✨ Everything You Love, All in One Place
-            </div>
-
-            {/* Main heading */}
-
-            <h1 className="mt-6 text-4xl font-black leading-[1.05] tracking-tight text-brand-navy sm:text-6xl lg:text-7xl">
-              Make Every
-              <span className="block text-brand-coral">
-                Moment Special
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-text-secondary sm:text-lg">
-              Explore a beautiful collection of gifts, toys, party essentials, divine décor, home décor, accessories, keychains, statues, showpieces and more.
-
-            </p>
-
-            {/* Main shopping CTA */}
-
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-
-              <Link
-                href="/shop/products"
-                className="inline-flex w-full items-center justify-center rounded-full bg-brand-navy px-8 py-4 text-sm font-extrabold text-white shadow-medium transition hover:-translate-y-0.5 hover:bg-brand-dark sm:w-auto"
-              >
-                🛍️ Shop Now
-              </Link>
-
-              <Link
-                href="/shop"
-                className="inline-flex w-full items-center justify-center rounded-full border-2 border-brand-navy bg-white px-8 py-4 text-sm font-extrabold text-brand-navy transition hover:bg-muted-surface sm:w-auto"
-              >
-                Browse Categories →
-              </Link>
-
-            </div>
-
-          </div>
-
-          {/* Quick category highlights */}
-
-          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="border-b border-slate-200 bg-white">
+        <div className="container-shop overflow-x-auto px-4">
+          <div className="flex min-w-max items-center gap-1 py-2">
 
             <Link
-              href="/shop"
-              className="group rounded-2xl border border-border bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-medium"
+              href="/shop/products"
+              className="rounded-lg bg-[#172554] px-4 py-2 text-xs font-extrabold text-white"
             >
-              <div className="text-3xl">
-                🎁
-              </div>
-
-              <p className="mt-2 text-sm font-extrabold text-brand-navy">
-                Gifts
-              </p>
-
-              <p className="mt-1 text-xs text-text-secondary">
-                For Every Occasion
-              </p>
+              All Products
             </Link>
 
-            <Link
-              href="/shop"
-              className="group rounded-2xl border border-border bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-medium"
-            >
-              <div className="text-3xl">
-                🧸
-              </div>
+            {quickCategories.map(
+              (item, index) => (
+                <Link
+                  key={item.category.id}
+                  href={`/categories/${item.category.slug}`}
+                  className="group flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:text-[#172554]"
+                >
+                  <span>
+                    {getCategoryIcon(
+                      item.category,
+                      index
+                    )}
+                  </span>
 
-              <p className="mt-2 text-sm font-extrabold text-brand-navy">
-                Toys
-              </p>
-
-              <p className="mt-1 text-xs text-text-secondary">
-                Fun For Kids
-              </p>
-            </Link>
-
-            <Link
-              href="/shop"
-              className="group rounded-2xl border border-border bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-medium"
-            >
-              <div className="text-3xl">
-                🎈
-              </div>
-
-              <p className="mt-2 text-sm font-extrabold text-brand-navy">
-                Party Items
-              </p>
-
-              <p className="mt-1 text-xs text-text-secondary">
-                Celebrate Better
-              </p>
-            </Link>
+                  <span>
+                    {item.category.name}
+                  </span>
+                </Link>
+              )
+            )}
 
             <Link
-              href="/shop"
-              className="group rounded-2xl border border-border bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-medium"
+              href="/shop/products"
+              className="rounded-lg px-3 py-2 text-xs font-extrabold text-[#f43f5e] hover:bg-rose-50"
             >
-              <div className="text-3xl">
-                🪔
-              </div>
-
-              <p className="mt-2 text-sm font-extrabold text-brand-navy">
-                Divine
-              </p>
-
-              <p className="mt-1 text-xs text-text-secondary">
-                Frames & Decor
-              </p>
+              Shop All →
             </Link>
 
           </div>
-
         </div>
       </section>
 
-
       {/* =================================================
-          RETAIL BENEFITS
-          ================================================= */}
+          HERO / SHOPPING BANNER
+      ================================================= */}
 
-      <section className="border-y border-border bg-white">
+      <section className="bg-white">
+        <div className="container-shop px-4 py-5 sm:py-7">
 
-        <div className="container-shop grid grid-cols-2 divide-x divide-y divide-border sm:grid-cols-4 sm:divide-y-0">
+          <div className="relative overflow-hidden rounded-3xl bg-[#172554] px-6 py-8 sm:px-10 sm:py-10 lg:px-14">
 
-          <div className="p-4 text-center sm:p-5">
-            <div className="text-2xl">
-              🚚
-            </div>
+            <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#f43f5e]/15" />
 
-            <p className="mt-2 text-xs font-extrabold text-brand-navy sm:text-sm">
-              PAN India Delivery
-            </p>
+            <div className="absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-white/5" />
 
-            <p className="mt-1 text-[10px] text-text-secondary sm:text-xs">
-              Across India
-            </p>
-          </div>
-
-          <div className="p-4 text-center sm:p-5">
-            <div className="text-2xl">
+            <div className="absolute right-[12%] top-10 hidden text-5xl opacity-80 lg:block">
               🎁
             </div>
 
-            <p className="mt-2 text-xs font-extrabold text-brand-navy sm:text-sm">
-              Gifts for Every Occasion
-            </p>
-
-            <p className="mt-1 text-[10px] text-text-secondary sm:text-xs">
-              Something Special
-            </p>
-          </div>
-
-          <div className="p-4 text-center sm:p-5">
-            <div className="text-2xl">
-              🛒
+            <div className="absolute bottom-8 right-[22%] hidden text-3xl opacity-70 lg:block">
+              ✨
             </div>
 
-            <p className="mt-2 text-xs font-extrabold text-brand-navy sm:text-sm">
-              Easy Shopping
-            </p>
+            <div className="relative grid items-center gap-8 lg:grid-cols-[1.4fr_0.6fr]">
 
-            <p className="mt-1 text-[10px] text-text-secondary sm:text-xs">
-              Simple Ordering
-            </p>
-          </div>
+              <div>
 
-          <div className="p-4 text-center sm:p-5">
-            <div className="text-2xl">
-              💝
+                <div className="inline-flex items-center rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold text-white ring-1 ring-white/15">
+                  ✨ Gifts • Toys • Decor • More
+                </div>
+
+                <h1 className="mt-4 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+                  Make Every
+                  <span className="text-[#f43f5e]">
+                    {" "}Moment Special
+                  </span>
+                </h1>
+
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
+                  Discover gifts, toys, party essentials,
+                  divine decor, stationery and more —
+                  all in one place.
+                </p>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+
+                  <Link
+                    href="/shop/products"
+                    className="inline-flex items-center justify-center rounded-xl bg-[#f43f5e] px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#e11d48]"
+                  >
+                    🛍️ Shop Now
+                  </Link>
+
+                  <Link
+                    href="/shop/products"
+                    className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-extrabold text-[#172554] transition hover:bg-slate-100"
+                  >
+                    Browse All Products →
+                  </Link>
+
+                </div>
+
+              </div>
+
+              {/* Hero highlights */}
+
+              <div className="hidden grid-cols-2 gap-3 lg:grid">
+
+                <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
+                  <div className="text-2xl">
+                    🚚
+                  </div>
+
+                  <p className="mt-2 text-sm font-extrabold text-white">
+                    PAN India
+                  </p>
+
+                  <p className="mt-1 text-xs text-blue-100">
+                    Delivery available
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
+                  <div className="text-2xl">
+                    🎁
+                  </div>
+
+                  <p className="mt-2 text-sm font-extrabold text-white">
+                    Great Gifts
+                  </p>
+
+                  <p className="mt-1 text-xs text-blue-100">
+                    For every occasion
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
+                  <div className="text-2xl">
+                    🛒
+                  </div>
+
+                  <p className="mt-2 text-sm font-extrabold text-white">
+                    Easy Shopping
+                  </p>
+
+                  <p className="mt-1 text-xs text-blue-100">
+                    Simple ordering
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
+                  <div className="text-2xl">
+                    💝
+                  </div>
+
+                  <p className="mt-2 text-sm font-extrabold text-white">
+                    Carefully Selected
+                  </p>
+
+                  <p className="mt-1 text-xs text-blue-100">
+                    Products you'll love
+                  </p>
+                </div>
+
+              </div>
+
             </div>
 
-            <p className="mt-2 text-xs font-extrabold text-brand-navy sm:text-sm">
-              Carefully Selected
-            </p>
-
-            <p className="mt-1 text-[10px] text-text-secondary sm:text-xs">
-              Products You'll Love
-            </p>
           </div>
 
         </div>
-
       </section>
-
 
       {/* =================================================
           SHOP BY CATEGORY
-          ================================================= */}
+      ================================================= */}
 
-      <section className="container-shop px-4 py-10 sm:py-14">
+      <section className="bg-white">
+        <div className="container-shop px-4 py-7 sm:py-9">
 
-        <div className="flex items-end justify-between gap-4">
-
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-coral">
-              Explore
-            </p>
-
-            <h2 className="mt-1 text-2xl font-black text-brand-navy sm:text-3xl">
-              Shop by Category
-            </h2>
-
-            <p className="mt-2 text-sm text-text-secondary">
-              Find something perfect for
-              every occasion.
-            </p>
-          </div>
-
-          <Link
-            href="/shop"
-            className="hidden shrink-0 text-sm font-extrabold text-brand-navy transition hover:text-brand-coral sm:block"
-          >
-            View All →
-          </Link>
-
-        </div>
-
-
-        {availableCategories.length > 0 ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-
-            {availableCategories
-              .slice(0, 8)
-              .map(
-                (item, index) => {
-                  const category =
-                    item.category;
-
-                  const icon =
-                    getCategoryIcon(
-                      category,
-                      index
-                    );
-
-                  return (
-                    <Link
-                      key={category.id}
-                      href={`/categories/${category.slug}`}
-                      className="group relative overflow-hidden rounded-2xl border border-border bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-brand-coral/30 hover:shadow-medium sm:p-5"
-                    >
-
-                      <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-brand-soft-gold transition group-hover:scale-110" />
-
-                      <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-muted-surface text-2xl">
-                        {icon}
-                      </div>
-
-                      <h3 className="relative mt-4 line-clamp-1 text-sm font-extrabold text-brand-navy sm:text-base">
-                        {category.name}
-                      </h3>
-
-                      <p className="relative mt-1 text-xs text-text-secondary">
-                        {item.productCount}{" "}
-                        {item.productCount ===
-                        1
-                          ? "product"
-                          : "products"}
-                      </p>
-
-                      <div className="relative mt-3 text-xs font-extrabold text-brand-coral">
-                        Explore →
-                      </div>
-
-                    </Link>
-                  );
-                }
-              )}
-
-          </div>
-        ) : (
-          <div className="mt-6 rounded-2xl border border-border bg-white p-8 text-center">
-            <div className="text-4xl">
-              🛍️
-            </div>
-
-            <h3 className="mt-4 text-xl font-black text-brand-navy">
-              Collection Coming Soon
-            </h3>
-
-            <p className="mt-2 text-sm text-text-secondary">
-              We are adding products to
-              the Shree Collection store.
-            </p>
-          </div>
-        )}
-
-        <div className="mt-5 sm:hidden">
-          <Link
-            href="/shop"
-            className="flex w-full items-center justify-center rounded-xl border border-border bg-white px-5 py-3 text-sm font-extrabold text-brand-navy"
-          >
-            View All Categories →
-          </Link>
-        </div>
-
-      </section>
-
-
-      {/* =================================================
-          PRODUCT COLLECTIONS
-          ================================================= */}
-
-      {featuredCategories.map(
-        (categoryItem, index) => {
-          const category =
-            categoryItem.category;
-
-          return (
-            <ProductSection
-              key={category.id}
-              title={category.name}
-              subtitle={
-                category.description ||
-                `Explore our ${category.name.toLowerCase()} collection`
-              }
-              categorySlug={
-                category.slug
-              }
-              viewAllHref={`/categories/${category.slug}`}
-              limit={8}
-              icon={getCategoryIcon(
-                category,
-                index
-              )}
-            />
-          );
-        }
-      )}
-
-
-      {/* =================================================
-          SHOP ALL
-          ================================================= */}
-
-      <section className="container-shop px-4 py-10 sm:py-14">
-
-        <div className="relative overflow-hidden rounded-[2rem] bg-brand-navy px-6 py-8 text-white sm:px-10 sm:py-10">
-
-          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-brand-coral/10" />
-
-          <div className="absolute -bottom-24 -left-20 h-60 w-60 rounded-full bg-brand-gold/10" />
-
-          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-end justify-between gap-4">
 
             <div>
-
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-coral">
-                Shree Collection
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f43f5e]">
+                Explore
               </p>
 
-              <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-                Explore the Complete Store
+              <h2 className="mt-1 text-2xl font-black tracking-tight text-[#172554] sm:text-3xl">
+                Shop by Category
               </h2>
 
-              <p className="mt-3 max-w-xl text-sm leading-6 text-blue-100">
-                Browse all gifts, toys, party
-                items, stationery, decor and
-                other products currently
-                available.
+              <p className="mt-1 text-sm text-slate-500">
+                Find something you love quickly.
               </p>
-
             </div>
 
             <Link
               href="/shop/products"
-              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-6 py-3.5 text-sm font-extrabold text-brand-navy transition hover:bg-muted-surface"
+              className="hidden text-sm font-extrabold text-[#172554] hover:text-[#f43f5e] sm:block"
             >
               Shop All Products →
             </Link>
 
           </div>
 
-        </div>
+          {availableCategories.length > 0 ? (
+            <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-8">
 
+              {availableCategories
+                .slice(0, 8)
+                .map((item, index) => {
+
+                  const category =
+                    item.category;
+
+                  return (
+                    <Link
+                      key={category.id}
+                      href={`/categories/${category.slug}`}
+                      className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-3 py-4 text-center transition hover:-translate-y-0.5 hover:border-[#f43f5e]/30 hover:shadow-md"
+                    >
+
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-50 text-2xl transition group-hover:bg-rose-50">
+                        {getCategoryIcon(
+                          category,
+                          index
+                        )}
+                      </div>
+
+                      <h3 className="mt-2 line-clamp-1 text-xs font-extrabold text-[#172554] sm:text-sm">
+                        {category.name}
+                      </h3>
+
+                      <p className="mt-0.5 text-[10px] text-slate-500">
+                        {item.productCount}{" "}
+                        {item.productCount === 1
+                          ? "product"
+                          : "products"}
+                      </p>
+
+                    </Link>
+                  );
+                })}
+
+            </div>
+          ) : (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-8 text-center">
+
+              <div className="text-4xl">
+                🛍️
+              </div>
+
+              <h3 className="mt-3 text-lg font-black text-[#172554]">
+                Collection Coming Soon
+              </h3>
+
+              <p className="mt-1 text-sm text-slate-500">
+                We are adding products to
+                the Shree Collection store.
+              </p>
+
+            </div>
+          )}
+
+          <div className="mt-4 sm:hidden">
+            <Link
+              href="/shop/products"
+              className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-[#172554]"
+            >
+              View All Products →
+            </Link>
+          </div>
+
+        </div>
       </section>
 
-
       {/* =================================================
-          SMALL BUSINESS LINK
-          =================================================
-          
-          Wholesale is intentionally NOT a major homepage
-          section. It remains available through the menu.
-          This small link is only an additional navigation
-          path for business customers.
-          ================================================= */}
+          SHOPPING BENEFITS
+      ================================================= */}
 
-      <section className="container-shop px-4 pb-10 sm:pb-14">
+      <section className="border-y border-slate-200 bg-slate-50">
+        <div className="container-shop grid grid-cols-2 divide-x divide-y divide-slate-200 sm:grid-cols-4 sm:divide-y-0">
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-border bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-
-          <div className="flex items-center gap-4">
-
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted-surface text-xl">
-              🏪
+          <div className="p-4 text-center sm:p-5">
+            <div className="text-xl">
+              🚚
             </div>
 
-            <div>
+            <p className="mt-1.5 text-xs font-extrabold text-[#172554] sm:text-sm">
+              PAN India Delivery
+            </p>
 
-              <p className="text-sm font-extrabold text-brand-navy">
-                Buying for your business?
-              </p>
+            <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
+              Across India
+            </p>
+          </div>
 
-              <p className="mt-1 text-xs text-text-secondary">
-                Wholesale pricing is available for
-                registered business customers.
-              </p>
+          <div className="p-4 text-center sm:p-5">
+            <div className="text-xl">
+              🎁
+            </div>
+
+            <p className="mt-1.5 text-xs font-extrabold text-[#172554] sm:text-sm">
+              Gifts for Every Occasion
+            </p>
+
+            <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
+              Something special
+            </p>
+          </div>
+
+          <div className="p-4 text-center sm:p-5">
+            <div className="text-xl">
+              🛒
+            </div>
+
+            <p className="mt-1.5 text-xs font-extrabold text-[#172554] sm:text-sm">
+              Easy Shopping
+            </p>
+
+            <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
+              Simple ordering
+            </p>
+          </div>
+
+          <div className="p-4 text-center sm:p-5">
+            <div className="text-xl">
+              💝
+            </div>
+
+            <p className="mt-1.5 text-xs font-extrabold text-[#172554] sm:text-sm">
+              Carefully Selected
+            </p>
+
+            <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
+              Products you'll love
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* =================================================
+          FEATURED PRODUCTS
+      ================================================= */}
+
+      {featuredCategories.length > 0 && (
+        <section className="bg-[#f8fafc]">
+
+          <div className="container-shop px-4 pt-8 sm:pt-10">
+
+            <div className="flex items-end justify-between gap-4">
+
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f43f5e]">
+                  Popular Now
+                </p>
+
+                <h2 className="mt-1 text-2xl font-black tracking-tight text-[#172554] sm:text-3xl">
+                  Explore Our Collections
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Shop our latest collections
+                  and popular products.
+                </p>
+              </div>
+
+              <Link
+                href="/shop/products"
+                className="hidden text-sm font-extrabold text-[#172554] hover:text-[#f43f5e] sm:block"
+              >
+                Shop All →
+              </Link>
 
             </div>
 
           </div>
 
-          <Link
-            href="/wholesale"
-            className="inline-flex items-center justify-center rounded-xl border border-brand-navy px-5 py-3 text-sm font-extrabold text-brand-navy transition hover:bg-brand-navy hover:text-white"
-          >
-            Wholesale Business →
-          </Link>
+          {featuredCategories.map(
+            (categoryItem, index) => {
+
+              const category =
+                categoryItem.category;
+
+              return (
+                <ProductSection
+                  key={category.id}
+                  title={category.name}
+                  subtitle={
+                    category.description ||
+                    `Explore our ${category.name.toLowerCase()} collection`
+                  }
+                  categorySlug={
+                    category.slug
+                  }
+                  viewAllHref={`/categories/${category.slug}`}
+                  limit={8}
+                  icon={getCategoryIcon(
+                    category,
+                    index
+                  )}
+                />
+              );
+            }
+          )}
+
+        </section>
+      )}
+
+      {/* =================================================
+          SHOPPING CTA
+      ================================================= */}
+
+      <section className="bg-white px-4 py-8 sm:py-10">
+        <div className="container-shop">
+
+          <div className="relative overflow-hidden rounded-3xl bg-[#172554] px-6 py-7 text-white sm:px-10 sm:py-9">
+
+            <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#f43f5e]/15" />
+
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+              <div>
+
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f43f5e]">
+                  Shree Collection
+                </p>
+
+                <h2 className="mt-1.5 text-2xl font-black sm:text-3xl">
+                  Explore the Complete Store
+                </h2>
+
+                <p className="mt-2 max-w-xl text-sm leading-6 text-blue-100">
+                  Browse all gifts, toys, party
+                  items, stationery, decor and
+                  other products currently
+                  available.
+                </p>
+
+              </div>
+
+              <Link
+                href="/shop/products"
+                className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#f43f5e] px-6 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#e11d48]"
+              >
+                Shop All Products →
+              </Link>
+
+            </div>
+
+          </div>
 
         </div>
+      </section>
 
+      {/* =================================================
+          WHOLESALE
+      ================================================= */}
+
+      <section className="bg-white px-4 pb-8 sm:pb-12">
+        <div className="container-shop">
+
+          <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+
+            <div className="flex items-center gap-4">
+
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm">
+                🏪
+              </div>
+
+              <div>
+
+                <p className="text-sm font-extrabold text-[#172554]">
+                  Buying for your business?
+                </p>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Wholesale pricing is available
+                  for registered business customers.
+                </p>
+
+              </div>
+
+            </div>
+
+            <Link
+              href="/wholesale"
+              className="inline-flex items-center justify-center rounded-xl border border-[#172554] bg-white px-5 py-3 text-sm font-extrabold text-[#172554] transition hover:bg-[#172554] hover:text-white"
+            >
+              Wholesale Business →
+            </Link>
+
+          </div>
+
+        </div>
       </section>
 
     </main>

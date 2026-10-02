@@ -282,7 +282,7 @@ export default function Header() {
                 sm:text-[23px]
               "
             >
-              shree collection
+              Shree Collection
             </div>
 
             <div
